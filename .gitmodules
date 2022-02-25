@@ -1,3 +1,6 @@
 [submodule "hc-sr04"]
 	path = hc-sr04
 	url = https://github.com/StMaHa/micropython-hcsr04.git
+[submodule "drivers/bmp180"]
+	path = drivers/bmp180
+	url = https://github.com/StMaHa/micropython-bmp180.git
