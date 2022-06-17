@@ -39,6 +39,7 @@ def start():
 
     # Try-Catch-Block
     try:
+        print("Robo started...")
         # Schleife endlos durchlaufen
         # +++ 1) +++
         while True:

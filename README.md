@@ -1,5 +1,14 @@
 # MicroPython
 
+**How to get ALL sources from this git repository**
+```
+git clone --recurse-submodules https://github.com/StMaHa/micropython-examples.git
+```
+If you miss to get the submodules, because you just cloned this repository...
+```
+git submodule update --init --recursive
+```
+
 **Flash MicroPython to Controller**<br>
 !!! Flashing by calling esptool with not sufficiant argumnets or by using thonny might result in failing controller functions !!!
 - ESP8266
@@ -9,10 +18,6 @@
 - RP2040
   - tbd
 
-**How to get ALL sources from this git repository**
-```
-git clone --recurse-submodules https://github.com/StMaHa/micropython-examples.git
-```
 
 # LICENSE
 See the [LICENSE](LICENSE) file for license rights and limitations.
