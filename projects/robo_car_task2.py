@@ -63,7 +63,7 @@ def start():
         print("Robo started...")
         # +++ 1) +++
         # Endlosschleife...
-		# Schreibe Sensormesswert (cm) auf die Konsole (kann spaeter wieder auskommentiert werden)
+        # Schreibe Sensormesswert (cm) auf die Konsole (kann spaeter wieder auskommentiert werden)
         while True:
             # Schreibe Sensormesswert (cm) auf die Konsole (kann spaeter wieder auskommentiert werden)
             # +++ 2) +++ Auskommentieren
@@ -73,11 +73,11 @@ def start():
             # Messe Entfernung und starte bzw. stoppe die Motoren
             # Ist der Sensormesswert (cm) kleiner 40 cm?
 
-				# +++ 2) +++
+                # +++ 2) +++
                 # alle Motoren stop wenn Sensorwert (cm) kleiner als 40 cm
 
 
-				# +++ 2) +++
+                # +++ 2) +++
                 # eine 1/2 Sekunde warten
 
                 # +++ 3) +++
@@ -98,7 +98,7 @@ def start():
                 # eine 1/2 Sekunde warten
 
 
-				# +++ 2) +++
+                # +++ 2) +++
                 # Andernfalls fahre Robo vorwaerts (Sensorwert (cm) kleiner als 40 cm)
 
 
