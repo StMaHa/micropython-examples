@@ -4,6 +4,9 @@
 # +++ 3) Zufälliges drehen des Robos nach links oder rechts
 
 # Bibliotheken und Klassen
+import os
+import sys
+
 from machine import Pin
 from time import sleep
 from random import choice
@@ -17,15 +20,33 @@ from motor import Motor
 speed_m1 = 0.5
 speed_m2 = 0.5
 
-# Pinnummern beziehen sich auf Wemos S2 mini
-# GPIOs zur Ansteuerung der Motoren
-pin_m1a = 37  # motor 1
-pin_m1b = 38  # motor 1
-pin_m2a = 39  # motor 2
-pin_m2b = 40  # motor 2
-# GPIOs des Abstandssensors
-pin_trigger = 17
-pin_echo = 16
+board_name = os.uname().sysname.strip().lower()
+print("Micropython board:", board_name)
+
+# Definitionen der GPIOs
+if board_name == 'rp2':
+    # Pinnummern beziehen sich auf Raspberry Pi Pico
+    # GPIOs zur Ansteuerung der Motoren
+    pin_m1a = 12  # motor 1
+    pin_m1b = 13  # motor 1
+    pin_m2a = 14  # motor 2
+    pin_m2b = 15  # motor 2
+    # GPIOs des Abstandssensors
+    pin_trigger = 0
+    pin_echo = 1
+elif board_name == 'esp32':
+    # Pinnummern beziehen sich auf Wemos S2 mini
+    # GPIOs zur Ansteuerung der Motoren
+    pin_m1a = 37  # motor 1
+    pin_m1b = 38  # motor 1
+    pin_m2a = 39  # motor 2
+    pin_m2b = 40  # motor 2
+    # GPIOs des Abstandssensors
+    pin_trigger = 17
+    pin_echo = 16
+else:
+    print("Pins sind für dieses Micropython board nicht definiert: ", board_name)
+    sys.exit()
 
 # Hier bgeinnt das Hauptprogramm
 def start():
@@ -40,20 +61,23 @@ def start():
     # Try-Catch-Block
     try:
         print("Robo started...")
-        # Schleife endlos durchlaufen
         # +++ 1) +++
+        # Endlosschleife...
+		# Schreibe Sensormesswert (cm) auf die Konsole (kann spaeter wieder auskommentiert werden)
         while True:
             # Schreibe Sensormesswert (cm) auf die Konsole (kann spaeter wieder auskommentiert werden)
             # +++ 2) +++ Auskommentieren
             #print(sensor.distance_cm())
 
-            # Ist der Sensormesswert (cm) kleiner 40 cm?
             # +++ 2) +++
-            # messe Entfernung
+            # Messe Entfernung und starte bzw. stoppe die Motoren
+            # Ist der Sensormesswert (cm) kleiner 40 cm?
             if sensor.distance_cm() < 40:
-                # alle Motoren stop
+				# +++ 2) +++
+                # alle Motoren stop wenn Sensorwert (cm) kleiner als 40 cm
                 motor1.stop()
                 motor2.stop()
+				# +++ 2) +++
                 # eine 1/2 Sekunde warten
                 sleep(0.5)
                 # +++ 3) +++
@@ -74,7 +98,8 @@ def start():
                 # eine 1/2 Sekunde warten
                 sleep(0.5)
             else:
-                # fahre Robo vorwaerts
+				# +++ 2) +++
+                # Andernfalls fahre Robo vorwaerts (Sensorwert (cm) kleiner als 40 cm)
                 motor1.forward(speed_m1)
                 motor2.forward(speed_m2)
     # Fangen eines Fehlers/Signals
