@@ -32,8 +32,8 @@ if board_name == 'rp2':
     pin_m2a = 14  # motor 2
     pin_m2b = 15  # motor 2
     # GPIOs des Abstandssensors
-    pin_trigger = 0
-    pin_echo = 1
+    pin_trigger = 1
+    pin_echo = 0
 elif board_name == 'esp32':
     # Pinnummern beziehen sich auf Wemos S2 mini
     # GPIOs zur Ansteuerung der Motoren
