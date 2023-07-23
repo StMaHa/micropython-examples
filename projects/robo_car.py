@@ -90,8 +90,8 @@ def start():
                     # Robo dreht in die andere Richtung
                     motor1.backward(speed_m1)
                     motor2.forward(speed_m2)
-                # Lass den Robo eine 1/2 Sekunde drehen
-                sleep(0.5)
+                # Lass den Robo eine 1/4, 1/2 oder 3/4  Sekunde drehen
+                sleep(choice([0.25, 0.5, 0.75]))
                 # alle Motoren stop
                 motor1.stop()
                 motor2.stop()
