@@ -11,12 +11,17 @@ git submodule update --init --recursive
 
 **Flash MicroPython to Controller**<br>
 !!! Flashing by calling esptool with not sufficiant argumnets or by using thonny might result in failing controller functions !!!
-- ESP8266
-  - esptool.py --chip=esp8266 --port=/dev/ttyUSB0 write_flash --flash_mode=dio --flash_size=4MB --flash_freq=keep 0x0 esp8266-xxx.bin
-- ESP32
-  - tbd
+- ESP8266  (example on Linux OS)
+  - python esptool.py --chip=esp8266 --port=/dev/ttyUSB0 erase_flash
+  - python esptool.py --chip=esp8266 --port=/dev/ttyUSB0 write_flash --flash_mode=dio --flash_size=4MB --flash_freq=keep 0x0 esp8266-xxx.bin
+- ESP32 S2 (example on Windows OS using serial port COM7)
+  - python esptool.py --chip esp32s2 --port COM7 erase_flash
+  - python esptool.py --chip esp32s2 --port COM7 write_flash -z 0x1000 LOLIN_S2_MINI-20240222-v1.22.2.bin
 - RP2040
-  - tbd
+  - Press and hold Button 'BOOTSEL' while connecting to USB
+  - An explorer window will open up
+  - Copy the uf2 file (RPI_PICO-20240222-v1.22.2.uf2) into this explorer window
+  - The explorer window will close instantly
 
 
 # LICENSE
