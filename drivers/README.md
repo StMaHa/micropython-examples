@@ -6,6 +6,7 @@
 
 ## Motor driver
 
+## Servo - turning by angle
 
 # LICENSE
 See the [LICENSE](LICENSE) file for license rights and limitations.
