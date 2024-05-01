@@ -2,9 +2,9 @@
 
 ## Blinking LED
 
-## Fading LED using PWM
-
 ## Distance measurement with HC-SR04
+
+## Fading LED using PWM
 
 ## Switching LED with a button using interrupts
 
