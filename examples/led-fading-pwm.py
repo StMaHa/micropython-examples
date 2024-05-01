@@ -20,3 +20,4 @@ try:
 except KeyboardInterrupt:
     print("Program aborted.")
     led_pwm.duty_ns(0)
+    led_pwm.deinit()
