@@ -1,12 +1,16 @@
 # Examples
 
-## WebRepl
+## Blinking LED
 
-## Wifi client setup
+## Fading LED using PWM
+
+## Distance measurement with HC-SR04
 
 ## Switching LED with a button using interrupts
 
-## Distance measurement with HC-SR04
+## Wifi client setup
+
+## WebRepl
 
 # LICENSE
 See the [LICENSE](LICENSE) file for license rights and limitations.
