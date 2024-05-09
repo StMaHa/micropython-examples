@@ -1,22 +1,37 @@
+"""
+Projekt für ein Roboter Workshop
+Auto mit 2 Rädern faehrt ohne gegen Hindernisse zu stossen.
+Ein Ultraschallsensor misst die Entfernung zu Hindernissen.
+Bei zu geringem Abstand zum Hindernis haelt der Robo, dreht
+in eine beliebige Richtung und faehrt weiter wenn kein Hindernis
+in der Naehe.
+Benoetigte Teile:
+- 2WD Robot Car
+- Motortreiber für 2 Motore
+- Ultraschallsensor HC-SR04 (inkl. Levelshifter)
+- Raspberry Pi Pico / Wemos S2 mini
+- Batterien (evtl. 5V Spannungsregler)
+"""
 # Aufgaben
 # +++ 1) Messen mit dem Ultraschallentfernungssensor „HC-SR04“ in einer Dauerschleife
 # +++ 2) Start / Stop der Motoren in Abhängigkeit der Entfernung
 # +++ 3) Zufälliges drehen des Robos nach links oder rechts
 
-# Bibliotheken und Klassen
-import os
-import sys
+# Micropython Bibliotheken und Klassen
+import os   # Betriebssystem Funktionen, z.B. uname(), Infos zum Micropython board
+import sys  # System Funktionen, z.B. exit()
 
-from machine import Pin
-from time import sleep
-from random import choice
+from machine import Pin    # Pin-Klasse
+from time import sleep     # Verzoegerung
+from random import choice  # Zufallswahl
 
-from hcsr04 import HCSR04
-from motor import Motor
+# Eigene Bibliotheken und Klassen
+from hcsr04 import HCSR04  # Ultraschallsensor-Klasse
+from motor import Motor    # Motor-Klasse
 
 # Globale Variablen
 
-# Motorenleistung
+# Motorenleistung/Geschwindigkeit, anpassen für Geradeauslauf
 speed_m1 = 0.5
 speed_m2 = 0.5
 
@@ -48,59 +63,73 @@ else:
     print("Pins sind für dieses Micropython board nicht definiert: ", board_name)
     sys.exit()
 
-# Hier bgeinnt das Hauptprogramm
-def start():
-    # Erzeuge eine Instanz der Motor-Klasse
-    # aktivieren von PWM
-    motor1 = Motor(pin_m1a, pin_m1b, pwm=True)
-    motor2 = Motor(pin_m2a, pin_m2b, pwm=True)
+# Erzeuge Instanzen der Motor-Klasse (PWM aktiviert)
+motor1 = Motor(pin_m1a, pin_m1b, pwm=True)
+motor2 = Motor(pin_m2a, pin_m2b, pwm=True)
 
+# Funktionen zum Steuern des Robos
+def robo_stop():
+    """ Stoppt das Roboter Auto """
+    # +++ 2) +++ alle Motoren stop 
+
+
+    # eine 1/2 Sekunde warten
+    sleep(0.5)
+
+
+def robo_go():
+    """ Faehrt Roboter Auto forwaerts """
+    # Fahre Robo vorwaerts
+    motor1.forward(speed_m1)
+    motor2.forward(speed_m2)
+
+
+def robo_turn():
+    """ Dreht Roboter in eine zufaellige Richtung """
+    # +++ 3) +++ Drehe Robo in ein beliebige Richtung
+    # Waehle zufaellig eine Drehrichtung
+	richtung = 1
+    if richtung:
+        # Robo dreht in die eine Richtung
+        motor1.forward(speed_m1)
+        motor2.backward(speed_m2)
+
+        # Robo dreht in die andere Richtung
+
+
+    # Lass den Robo eine 1/4, 1/2 oder 3/4  Sekunde drehen
+	delay = choice([0.25, 0.5, 0.75]) 
+    sleep(delay)
+    # alle Motoren stop
+    robo_stop()
+
+# Hier beginnt das Hauptprogramm
+def start():
+    """ Startet Roboter Auto """
     # Erzeuge eine Instanz der Distanzsensor-Klasse
     sensor = HCSR04(trigger_pin=pin_trigger, echo_pin=pin_echo, echo_timeout_us=10000)
 
     # Try-Catch-Block
     try:
-        print("Robo started...")
-        # +++ 1) +++
+        print("Robo faehrt...")
         # Endlosschleife...
-        # Schreibe Sensormesswert (cm) auf die Konsole (kann spaeter wieder auskommentiert werden)
         while True:
-            # Schreibe Sensormesswert (cm) auf die Konsole (kann spaeter wieder auskommentiert werden)
-            # +++ 2) +++ Auskommentieren
-            print(sensor.distance_cm())
+            # +++ 1) +++ Schreibe Sensormesswert (cm) auf die Konsole (kann spaeter wieder auskommentiert werden)
+            sensor_value = sensor.distance_cm()
+            print(sensor_value)
 
             # +++ 2) +++
-            # Messe Entfernung und starte bzw. stoppe die Motoren
             # Ist der Sensormesswert (cm) kleiner 40 cm?
 
                 # +++ 2) +++
-                # alle Motoren stop wenn Sensorwert (cm) kleiner als 40 cm
-
-
-                # +++ 2) +++
-                # eine 1/2 Sekunde warten
+                # Alle Motoren stop wenn Sensorwert (cm) kleiner als 40 cm
 
                 # +++ 3) +++
-                # Waehle zufaellig eine Drehrichtung
-
-                    # Robo dreht in die eine Richtung
-
-
-
-                    # Robo dreht in die andere Richtung
-
-
-                # Lass den Robo eine 1/2 Sekunde drehen
-
-                # alle Motoren stop
-
-
-                # eine 1/2 Sekunde warten
+                # Drehe Robo in ein beliebige Richtung
 
 
                 # +++ 2) +++
                 # Andernfalls fahre Robo vorwaerts (Sensorwert (cm) kleiner als 40 cm)
-
 
     # Fangen eines Fehlers/Signals
     except KeyboardInterrupt:
@@ -108,8 +137,7 @@ def start():
     # Dieser Block wird immer ausgefuehrt: zum Schluss muss man aufraeumen
     finally:
         # Motoren aus
-        motor1.stop()
-        motor2.stop()
+        robo_stop()
         print("Programm beendet.")
 
 # Manuelles Ausführen in der IDE
