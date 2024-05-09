@@ -49,6 +49,8 @@ if board_name == 'rp2':
     # GPIOs des Abstandssensors
     pin_trigger = 1
     pin_echo = 0
+    # Status LED
+    pin_led = 25
 elif board_name == 'esp32':
     # Pinnummern beziehen sich auf Wemos S2 mini
     # GPIOs zur Ansteuerung der Motoren
@@ -59,6 +61,8 @@ elif board_name == 'esp32':
     # GPIOs des Abstandssensors
     pin_trigger = 17
     pin_echo = 16
+    # Status LED
+    pin_led = 15
 else:
     print("Pins sind für dieses Micropython board nicht definiert: ", board_name)
     sys.exit()
@@ -66,6 +70,8 @@ else:
 # Erzeuge Instanzen der Motor-Klasse (PWM aktiviert)
 motor1 = Motor(pin_m1a, pin_m1b, pwm=True)
 motor2 = Motor(pin_m2a, pin_m2b, pwm=True)
+# Erzeuge Instanzen der Motor-Klasse
+led = Pin(pin_led, Pin.OUT)
 
 # Funktionen zum Steuern des Robos
 def robo_stop():
@@ -112,6 +118,7 @@ def start():
     # Try-Catch-Block
     try:
         print("Robo faehrt...")
+        led.on()
         # Endlosschleife...
         while True:
             # +++ 1) +++ Schreibe Sensormesswert (cm) auf die Konsole (kann spaeter wieder auskommentiert werden)
@@ -138,6 +145,7 @@ def start():
     finally:
         # Motoren aus
         robo_stop()
+        led.off()
         print("Programm beendet.")
 
 # Manuelles Ausführen in der IDE
