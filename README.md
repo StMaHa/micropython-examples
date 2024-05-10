@@ -4,8 +4,10 @@
 ```
 git clone --recurse-submodules https://github.com/StMaHa/micropython-examples.git
 ```
-If you miss to get the submodules, because you just cloned this repository...
+If you miss to get the submodules, because you just cloned this repository...  
+Change into directory 'micropython-examples'...
 ```
+cd micropython-examples
 git submodule update --init --recursive
 ```
 
