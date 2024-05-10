@@ -94,7 +94,7 @@ def robo_turn():
     """ Dreht Roboter in eine zufaellige Richtung """
     # +++ 3) +++ Drehe Robo in ein beliebige Richtung
     # Waehle zufaellig eine Drehrichtung
-	richtung = 1
+    richtung = 1
     if richtung:
         # Robo dreht in die eine Richtung
         motor1.forward(speed_m1)
@@ -104,7 +104,7 @@ def robo_turn():
 
 
     # Lass den Robo eine 1/4, 1/2 oder 3/4  Sekunde drehen
-	delay = choice([0.25, 0.5, 0.75]) 
+    delay = choice([0.25, 0.5, 0.75]) 
     sleep(delay)
     # alle Motoren stop
     robo_stop()
