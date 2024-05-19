@@ -123,7 +123,9 @@ def start():
         while True:
             # +++ 1) +++ Schreibe Sensormesswert (cm) auf die Konsole (kann spaeter wieder auskommentiert werden)
             sensor_value = sensor.distance_cm()
-            #print(sensor_value)
+            if sensor_value >= 250:  # ignoriere Fehlmessung
+                continue
+            print(sensor_value)
 
             # +++ 2) +++
             # Ist der Sensormesswert (cm) kleiner 40 cm?
