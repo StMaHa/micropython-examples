@@ -1,4 +1,4 @@
 # Examples for micro:bit
 
 # LICENSE
-See the [LICENSE](../../LICENSE.md) file for license rights and limitations.
+See the [LICENSE](../../LICENSE) file for license rights and limitations.
