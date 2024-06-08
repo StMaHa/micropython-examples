@@ -10,5 +10,5 @@
 [How to calculate the angle?](https://github.com/StMaHa/micropython-examples/blob/main/drivers/servo/README.md)
 
 # LICENSE
-See the [LICENSE](LICENSE) file for license rights and limitations.
+See the [LICENSE](../LICENSE) file for license rights and limitations.
 Submodules might have a different license.
