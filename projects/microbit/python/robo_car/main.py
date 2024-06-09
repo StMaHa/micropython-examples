@@ -31,12 +31,14 @@ def robo_stop():
 
 
 def robo_go():
+    display.show(Image.ARROW_S)
     motor1.forward(speed_m1)
     motor2.forward(speed_m2)
 
 
 def robo_turn():
     richtung = choice([0, 1])
+    display.show(Image("00000:09090:99999:09090:00000"))
     if richtung:
         motor1.forward(speed_m1)
         motor2.backward(speed_m2)
@@ -50,6 +52,8 @@ def robo_turn():
 
 while True:
     sensor_value = sensor.distance_cm()
+    if sensor_value < 0:
+        continue
     print(sensor_value)
 
     if sensor_value < 40:
@@ -57,3 +61,4 @@ while True:
         robo_turn()
     else:
         robo_go()
+

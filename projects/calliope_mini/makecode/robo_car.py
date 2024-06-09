@@ -15,7 +15,6 @@ pin_echo = DigitalPin.P16
 serial.redirect_to_usb()
 serial.set_baud_rate(BaudRate.BAUD_RATE115200)
 
-
 class HCSR04:
     # echo_timeout_us is based in chip range limit (400cm)
     def __init__(self, trigger_pin, echo_pin, timeout_us=30000):  # timeout_us = 30000 = 500cm * 2 * 30us/cm
@@ -35,14 +34,13 @@ class HCSR04:
         pins.digital_write_pin(self.trigger, 0)
         # Measure ultrasonic echo
         pulse_time = pins.pulse_in(self.echo, PulseValue.HIGH, self.echo_timeout_us)
-        if pulse_time <= 0:
-            MAX_RANGE_IN_CM = 500 # it's really ~400, but I've read people say they see it working up to ~460
-            pulse_time = int(MAX_RANGE_IN_CM * 29.1) # 1cm each 29.1us
         return pulse_time
 
     def distance_cm(self):
         pulse_time = self._send_pulse_and_wait()
-        distance = (pulse_time / 2) / 29.1
+        distance = -1
+        if pulse_time > 0:
+            distance = int((pulse_time / 2) / 29.1)
         return distance
 
 
@@ -70,6 +68,13 @@ class Robo:
         self.motor2 = motor2
         self.speed_m1 = speed_motor1
         self.speed_m2 = speed_motor2
+        self.turn_icon = images.create_image("""
+                                            . . . . .
+                                            . # . # .
+                                            # # # # #
+                                            . # . # .
+                                            . . . . .
+                                            """)
 
     def stop(self):
         self.motor1.stop()
@@ -77,10 +82,12 @@ class Robo:
         pause(500)
 
     def go(self):
+        basic.show_icon(IconNames.ARROW_SOUTH)
         self.motor1.forward(self.speed_m1)
         self.motor2.forward(self.speed_m2)
 
     def turn(self):
+        self.turn_icon.show_image(0)
         richtung = Math.random_boolean()
         if richtung:
             self.motor1.forward(self.speed_m1)
@@ -101,6 +108,8 @@ def main():
 
     while True:
         sensor_value = sensor.distance_cm()
+        if sensor_value < 0:
+                continue
         serial.write_line(str(sensor_value))
 
         if sensor_value < 40:

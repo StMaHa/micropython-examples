@@ -17,4 +17,4 @@ class Motor:
 
     def stop(self):
         self.pin1.write_analog(speed_max)
-        self.pin2.write_analog(0)
+        self.pin2.write_analog(speed_max)
