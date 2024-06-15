@@ -1,4 +1,4 @@
-from microbit import *
+from calliopemini import *
 from machine import time_pulse_us
 from utime import sleep_us
 
