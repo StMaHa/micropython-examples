@@ -18,6 +18,8 @@ Copy needed files to root directory of the Micropython board:
 - motor.py
 - hcsr04.py
 
+[Picture of RoboCar with Calliope mini V3](../../robo_car_calliope-mini-v3.jpg)
+
 # LICENSE
 See the [LICENSE](../../../../LICENSE) file for license rights and limitations.
 Submodules might have a different license.
