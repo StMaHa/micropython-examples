@@ -1,5 +1,5 @@
 # Imports go at the top
-from calliopemini import *
+from microbit import *
 from random import choice
 from motor import Motor
 from hcsr04 import HCSR04

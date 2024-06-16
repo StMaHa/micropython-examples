@@ -1,4 +1,4 @@
-from calliopemini import *
+from microbit import *
 from machine import time_pulse_us
 from utime import sleep_us
 
@@ -29,4 +29,4 @@ class HCSR04:
         distance = -1
         if pulse_time >= 0:
             distance = (pulse_time / 2) / 29.1
-        return distance
+        return int(distance)

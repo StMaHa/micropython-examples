@@ -1,4 +1,4 @@
-from calliopemini import *
+from microbit import *
 
 speed_max = 1023
 
