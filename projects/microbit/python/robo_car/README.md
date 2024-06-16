@@ -19,6 +19,8 @@ Copy needed files to root directory of the Micropython board:
 - motor.py
 - hcsr04.py
 
+[Picture of RoboCar with micro:bit V2](../../robo_car_microbit-v2.jpg)
+
 # LICENSE
 See the [LICENSE](../../../../LICENSE) file for license rights and limitations.
 Submodules might have a different license.
