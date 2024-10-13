@@ -18,6 +18,16 @@ Copy needed files to root directory of the Micropython board:
 - main.py
 - robo_car.py (for exercises: robo_car_1.py, robo_car_2.py, robo_car_3.py)
 
+Features which are posssibly used by the robo can be tested separately by  
+the following examples:  
+- ultrasonic-sensor.py
+- servo-control.py
+- led-blink.py
+- button-switch.py
+- analog-input.py
+
+These examples cover the basic IOs of a microcontroller like the Raspberry Pi Pico.  
+
 The folder 'using_modules' contains an extended version of this project that  
 uses modules to controle the motors and access the ultrasonic sensor.
 
