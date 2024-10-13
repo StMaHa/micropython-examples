@@ -7,10 +7,10 @@ in eine beliebige Richtung und faehrt weiter wenn kein Hindernis
 in der Naehe.
 Benoetigte Teile:
 - 2WD Robot Car
-- Motortreiber für 2 Motore
-- Ultraschallsensor HC-SR04 (inkl. Levelshifter)
-- Raspberry Pi Pico / Wemos S2 mini
-- Batterien (evtl. 5V Spannungsregler)
+- Motortreiber für 2 Motoren
+- Ultraschallsensor HC-SR04P (3.3V)
+- Raspberry Pi Pico
+- Batterien (5V Spannungsregler)
 """
 # Aufgaben
 # +++ 1) Messen mit dem Ultraschallentfernungssensor „HC-SR04“ in einer Dauerschleife
@@ -21,64 +21,84 @@ Benoetigte Teile:
 import os   # Betriebssystem Funktionen, z.B. uname(), Infos zum Micropython board
 import sys  # System Funktionen, z.B. exit()
 
-from machine import Pin    # Pin-Klasse
-from time import sleep     # Verzoegerung
-from random import choice  # Zufallswahl
-
-# Eigene Bibliotheken und Klassen
-from hcsr04 import HCSR04  # Ultraschallsensor-Klasse
-from motor import Motor    # Motor-Klasse
+from machine import Pin            # Pin-Klasse
+from machine import PWM            # PWM-Klasse
+from machine import time_pulse_us  # Funktion um Echopuls zu messen
+from time import sleep             # Verzoegerung in Sekunden
+from random import choice          # Zufallswahl
+from utime import sleep_us         # Verzoegerung in Mikrosekunden
 
 # Globale Variablen
-
+# GPIOs des Abstandssensors
+DISTANCE_TIME_OF_SOUND_AT_CM = 29.1
+DISTANCE_MAX_RANGE_IN_CM = 500
+DISTANCE_ECHO_PIN = 10
+DISTANCE_TRIGGER_PIN = 11
+DISTANCE_ECHO_TIMEOUT_US = int(DISTANCE_MAX_RANGE_IN_CM*2*DISTANCE_TIME_OF_SOUND_AT_CM)
 # Motorenleistung/Geschwindigkeit, anpassen für Geradeauslauf
-speed_m1 = 0.5
-speed_m2 = 0.5
+MOTOR_PWM_MAX_DUTY_CYLCE = 65535
+MOTOR_PWM_FREQUENCY = 500
+MOTOR_SPEED_1 = 0.5
+MOTOR_SPEED_2 = 0.55
+MOTOR_LINE_1A_PIN = 16  # Motor 1
+MOTOR_LINE_1B_PIN = 17  # Motor 1
+MOTOR_LINE_2A_PIN = 18  # Motor 2
+MOTOR_LINE_2B_PIN = 19  # Motor 2
+# Status LED
+LED_ONBOARD_PIN = 25
+# Servo
+SERVO_PIN = 0
+SERVO_MID = 1300000  # 1350000 ns = 1350 us = 1.35 ms
+SERVO_MIN = 800000   # 800000 ns = 800 us = 0.8 ms
+SERVO_MAX = 1900000  # 1900000 ns = 1900 us = 1.9 ms
 
 board_name = os.uname().sysname.strip().lower()
 print("Micropython board:", board_name)
 
-# Definitionen der GPIOs
-if board_name == 'rp2':
-    # Pinnummern beziehen sich auf Raspberry Pi Pico
-    # GPIOs zur Ansteuerung der Motoren
-    pin_m1a = 12  # motor 1
-    pin_m1b = 13  # motor 1
-    pin_m2a = 14  # motor 2
-    pin_m2b = 15  # motor 2
-    # GPIOs des Abstandssensors
-    pin_trigger = 1
-    pin_echo = 0
-    # Status LED
-    pin_led = 25
-elif board_name == 'esp32':
-    # Pinnummern beziehen sich auf Wemos S2 mini
-    # GPIOs zur Ansteuerung der Motoren
-    pin_m1a = 37  # motor 1
-    pin_m1b = 38  # motor 1
-    pin_m2a = 39  # motor 2
-    pin_m2b = 40  # motor 2
-    # GPIOs des Abstandssensors
-    pin_trigger = 17
-    pin_echo = 16
-    # Status LED
-    pin_led = 15
-else:
-    print("Pins sind für dieses Micropython board nicht definiert: ", board_name)
-    sys.exit()
+# Initialisiere IOs
+motor_line_1a = PWM(Pin(MOTOR_LINE_1A_PIN, Pin.OUT), freq=MOTOR_PWM_FREQUENCY, duty_u16=0)
+motor_line_1b = PWM(Pin(MOTOR_LINE_1B_PIN, Pin.OUT), freq=MOTOR_PWM_FREQUENCY, duty_u16=0)
+motor_line_2a = PWM(Pin(MOTOR_LINE_2A_PIN, Pin.OUT), freq=MOTOR_PWM_FREQUENCY, duty_u16=0)
+motor_line_2b = PWM(Pin(MOTOR_LINE_2B_PIN, Pin.OUT), freq=MOTOR_PWM_FREQUENCY, duty_u16=0)
 
-# Erzeuge Instanzen der Motor-Klasse (PWM aktiviert)
-motor1 = Motor(pin_m1a, pin_m1b, pwm=True)
-motor2 = Motor(pin_m2a, pin_m2b, pwm=True)
+distance_trigger = Pin(DISTANCE_TRIGGER_PIN, mode=Pin.OUT)
+distance_echo = Pin(DISTANCE_ECHO_PIN, mode=Pin.IN, pull=Pin.PULL_DOWN)
+
 # Erzeuge Instanzen der Motor-Klasse
-led = Pin(pin_led, Pin.OUT)
+led = Pin(LED_ONBOARD_PIN, Pin.OUT)
+
+# Demo-Funktion zum Steuern eines Servos
+def servo_turn():
+    servo = PWM(Pin(SERVO_PIN), freq=50)
+    servo.duty_ns(SERVO_MIN)
+    sleep(1)
+    servo.duty_ns(SERVO_MAX)
+    sleep(1)
+    servo.duty_ns(SERVO_MID)
+    sleep(1)
+    servo.deinit()
 
 # Funktionen zum Steuern des Robos
+def motor_forward(pin1, pin2, speed):
+    pin1.duty_u16(0)
+    pin2.duty_u16(int(MOTOR_PWM_MAX_DUTY_CYLCE * speed))
+
+
+def motor_backward(pin1, pin2, speed):
+    pin1.duty_u16(int(MOTOR_PWM_MAX_DUTY_CYLCE * speed))
+    pin2.duty_u16(0)
+
+
+def motor_stop(pin1, pin2):
+    pin1.duty_u16(0)
+    pin2.duty_u16(0)
+
+
 def robo_stop():
     """ Stoppt das Roboter Auto """
     # +++ 2) +++ alle Motoren stop 
-    motor1.stop()
-    motor2.stop()
+    motor_stop(motor_line_1a, motor_line_1b)
+    motor_stop(motor_line_2a, motor_line_2b)
     # eine 1/2 Sekunde warten
     sleep(0.5)
 
@@ -86,52 +106,69 @@ def robo_stop():
 def robo_go():
     """ Faehrt Roboter Auto forwaerts """
     # Fahre Robo vorwaerts
-    motor1.forward(speed_m1)
-    motor2.forward(speed_m2)
+    motor_forward(motor_line_1a, motor_line_1b, MOTOR_SPEED_1)
+    motor_forward(motor_line_2a, motor_line_2b, MOTOR_SPEED_2)
 
 
 def robo_turn():
     """ Dreht Roboter in eine zufaellige Richtung """
+    servo_turn()
     # +++ 3) +++ Drehe Robo in ein beliebige Richtung
     # Waehle zufaellig eine Drehrichtung
     richtung = choice([0, 1])
     if richtung:
         # Robo dreht in die eine Richtung
-        motor1.forward(speed_m1)
-        motor2.backward(speed_m2)
+        motor_forward(motor_line_1a, motor_line_1b, MOTOR_SPEED_1)
+        motor_backward(motor_line_2a, motor_line_2b, MOTOR_SPEED_2)
     else:
         # Robo dreht in die andere Richtung
-        motor1.backward(speed_m1)
-        motor2.forward(speed_m2)
+        motor_backward(motor_line_1a, motor_line_1b, MOTOR_SPEED_1)
+        motor_forward(motor_line_2a, motor_line_2b, MOTOR_SPEED_2)
     # Lass den Robo eine 1/4, 1/2 oder 3/4  Sekunde drehen
     delay = choice([0.25, 0.5, 0.75]) 
     sleep(delay)
     # alle Motoren stop
     robo_stop()
 
+# Funktion zum Messen der netfernung mit einem Ultraschallsensors
+def get_distance():
+    distance_trigger.value(0)
+
+    # Sende Puls von 10us
+    sleep_us(5)
+    distance_trigger.value(1)
+    sleep_us(10)
+    distance_trigger.value(0)
+    # Hole Laenge des Echopuls
+    pulse_time = time_pulse_us(distance_echo, 1, DISTANCE_ECHO_TIMEOUT_US)
+    if pulse_time < 0:
+        # Max Wert bei Fehlmessung
+        pulse_time = DISTANCE_ECHO_TIMEOUT_US
+    # Berechne Entfernung in cm
+    distance_cm = (pulse_time / 2) / DISTANCE_TIME_OF_SOUND_AT_CM
+    return distance_cm
+
 # Hier beginnt das Hauptprogramm
 def start():
     """ Startet Roboter Auto """
-    # Erzeuge eine Instanz der Distanzsensor-Klasse
-    sensor = HCSR04(trigger_pin=pin_trigger, echo_pin=pin_echo, echo_timeout_us=10000)
-
     # Try-Catch-Block
     try:
         print("Robo faehrt...")
         led.on()
+        servo_turn()
         # Endlosschleife...
         while True:
-            # +++ 1) +++ Schreibe Sensormesswert (cm) auf die Konsole (kann spaeter wieder auskommentiert werden)
-            sensor_value = sensor.distance_cm()
-            if sensor_value >= 250:  # ignoriere Fehlmessung
+            # +++ 1) +++ Schreibe Entfernung (cm) auf die Konsole
+            distance = get_distance()
+            if distance >= DISTANCE_MAX_RANGE_IN_CM:  # ignoriere Fehlmessung
                 continue
-            print(sensor_value)
+            print(distance)
 
             # +++ 2) +++
-            # Ist der Sensormesswert (cm) kleiner 40 cm?
-            if sensor_value < 40:
+            # Ist die Entfernung (cm) kleiner 40 cm?
+            if distance < 40:
                 # +++ 2) +++
-                # Alle Motoren stop wenn Sensorwert (cm) kleiner als 40 cm
+                # Alle Motoren stop wenn Entfernung (cm) kleiner als 40 cm
                 robo_stop()
                 # +++ 3) +++
                 # Drehe Robo in ein beliebige Richtung
@@ -140,6 +177,7 @@ def start():
                 # +++ 2) +++
                 # Andernfalls fahre Robo vorwaerts (Sensorwert (cm) kleiner als 40 cm)
                 robo_go()
+            sleep(0.1)  # Wartezeit zwischen Entfernungsmessungen
     # Fangen eines Fehlers/Signals
     except KeyboardInterrupt:
         print("Programm abgebrochen.")
