@@ -23,5 +23,5 @@ Copy needed files to root directory of the Micropython board:
 [Picture of RoboCar with Raspberry Pi Pico](robo_car_raspberry-pi-pico.jpg)
 
 # LICENSE
-See the [LICENSE](../../LICENSE) file for license rights and limitations.
+See the [LICENSE](../../../LICENSE) file for license rights and limitations.
 Submodules might have a different license.
