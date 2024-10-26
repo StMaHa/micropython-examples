@@ -7,10 +7,10 @@ in eine beliebige Richtung und faehrt weiter wenn kein Hindernis
 in der Naehe.
 Benoetigte Teile:
 - 2WD Robot Car
-- Motortreiber für 2 Motore
-- Ultraschallsensor HC-SR04 (inkl. Levelshifter)
-- Raspberry Pi Pico / Wemos S2 mini
-- Batterien (evtl. 5V Spannungsregler)
+- Motortreiber für 2 Motoren
+- Ultraschallsensor HC-SR04P (3.3V) oder HC-SR04 (inkl. Levelshifter)
+- Raspberry Pi Pico
+- Batterien (5V Spannungsregler)
 """
 # Aufgaben
 # +++ 1) Messen mit dem Ultraschallentfernungssensor „HC-SR04“ in einer Dauerschleife
@@ -39,33 +39,18 @@ board_name = os.uname().sysname.strip().lower()
 print("Micropython board:", board_name)
 
 # Definitionen der GPIOs
-if board_name == 'rp2':
-    # Pinnummern beziehen sich auf Raspberry Pi Pico
-    # GPIOs zur Ansteuerung der Motoren
-    pin_m1a = 12  # motor 1
-    pin_m1b = 13  # motor 1
-    pin_m2a = 14  # motor 2
-    pin_m2b = 15  # motor 2
-    # GPIOs des Abstandssensors
-    pin_trigger = 1
-    pin_echo = 0
-    # Status LED
-    pin_led = 25
-elif board_name == 'esp32':
-    # Pinnummern beziehen sich auf Wemos S2 mini
-    # GPIOs zur Ansteuerung der Motoren
-    pin_m1a = 37  # motor 1
-    pin_m1b = 38  # motor 1
-    pin_m2a = 39  # motor 2
-    pin_m2b = 40  # motor 2
-    # GPIOs des Abstandssensors
-    pin_trigger = 17
-    pin_echo = 16
-    # Status LED
-    pin_led = 15
-else:
-    print("Pins sind für dieses Micropython board nicht definiert: ", board_name)
-    sys.exit()
+# Pinnummern beziehen sich auf Raspberry Pi Pico
+# GPIOs zur Ansteuerung der Motoren
+pin_m1a = 12  # motor 1
+pin_m1b = 13  # motor 1
+pin_m2a = 14  # motor 2
+pin_m2b = 15  # motor 2
+# GPIOs des Abstandssensors
+pin_trigger = 1
+pin_echo = 0
+# Status LED
+pin_led = 25
+
 
 # Erzeuge Instanzen der Motor-Klasse (PWM aktiviert)
 motor1 = Motor(pin_m1a, pin_m1b, pwm=True)

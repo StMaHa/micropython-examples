@@ -126,6 +126,7 @@ def start():
             if sensor_value >= 250:  # ignoriere Fehlmessung
                 continue
 
+
             # +++ 2) +++
             # Ist der Sensormesswert (cm) kleiner 40 cm?
 
