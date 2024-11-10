@@ -1,7 +1,7 @@
 # MicroPython
 
 ### Find released states of this git repository
-As things change from time to time, certain states, such as trainings, are frozen by tags/releases.
+As things change from time to time, certain states, such as trainings, are frozen by tags/releases.  
 [Releases](https://github.com/StMaHa/micropython-examples/releases)
 
 ### How to get ALL latest sources from this git repository
