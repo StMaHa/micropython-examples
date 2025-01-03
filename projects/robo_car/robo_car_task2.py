@@ -33,107 +33,109 @@ from utime import sleep_us         # Verzoegerung in Mikrosekunden
 # GPIOs des Abstandssensors
 DISTANCE_TIME_OF_SOUND_AT_CM = 29.1
 DISTANCE_MAX_RANGE_IN_CM = 500
-DISTANCE_ECHO_PIN = 10
-DISTANCE_TRIGGER_PIN = 11
+DISTANCE_ECHO_IO = 10
+DISTANCE_TRIGGER_IO = 11
 DISTANCE_ECHO_TIMEOUT_US = int(DISTANCE_MAX_RANGE_IN_CM*2*DISTANCE_TIME_OF_SOUND_AT_CM)
 # Motorenleistung/Geschwindigkeit, anpassen für Geradeauslauf
 MOTOR_PWM_MAX_DUTY_CYLCE = 65535
 MOTOR_PWM_FREQUENCY = 500
-MOTOR_SPEED_1 = 0.5
-MOTOR_SPEED_2 = 0.55
-MOTOR_LINE_1A_PIN = 16  # Motor 1
-MOTOR_LINE_1B_PIN = 17  # Motor 1
-MOTOR_LINE_2A_PIN = 18  # Motor 2
-MOTOR_LINE_2B_PIN = 19  # Motor 2
+MOTOR_1_SPEED = 0.9
+MOTOR_2_SPEED = 0.9
+MOTOR_1_LINE_A_IO = 16  # Motor 1
+MOTOR_1_LINE_B_IO = 17  # Motor 1
+MOTOR_2_LINE_A_IO = 18  # Motor 2
+MOTOR_2_LINE_B_IO = 19  # Motor 2
 # Status LED
-LED_ONBOARD_PIN = 25
+LED_ONBOARD_IO = "LED"  # 25
 # Servo
-SERVO_PIN = 0
-SERVO_MID = 1300000  # 1350000 ns = 1350 us = 1.35 ms
-SERVO_MIN = 800000   # 800000 ns = 800 us = 0.8 ms
-SERVO_MAX = 1900000  # 1900000 ns = 1900 us = 1.9 ms
+IO_SERVO = 0
+SERVO_ANGLE_MIN = 700000   # 700000 ns = 700 us = 0.7 ms
+SERVO_ANGLE_MID = 1500000  # 1500000 ns = 1500 us = 1.5 ms
+SERVO_ANGLE_MAX = 2300000  # 2300000 ns = 2300 us = 2.3 ms
 
 # Globale Variablen
 
 board_name = os.uname().sysname.strip().lower()
 print("Micropython board:", board_name)
 
-# Initialisiere IOs
-motor_line_1a = PWM(Pin(MOTOR_LINE_1A_PIN, Pin.OUT), freq=MOTOR_PWM_FREQUENCY, duty_u16=0)
-motor_line_1b = PWM(Pin(MOTOR_LINE_1B_PIN, Pin.OUT), freq=MOTOR_PWM_FREQUENCY, duty_u16=0)
-motor_line_2a = PWM(Pin(MOTOR_LINE_2A_PIN, Pin.OUT), freq=MOTOR_PWM_FREQUENCY, duty_u16=0)
-motor_line_2b = PWM(Pin(MOTOR_LINE_2B_PIN, Pin.OUT), freq=MOTOR_PWM_FREQUENCY, duty_u16=0)
-
-distance_trigger = Pin(DISTANCE_TRIGGER_PIN, mode=Pin.OUT)
-distance_echo = Pin(DISTANCE_ECHO_PIN, mode=Pin.IN, pull=Pin.PULL_DOWN)
+distance_trigger = Pin(DISTANCE_TRIGGER_IO, mode=Pin.OUT)
+distance_echo = Pin(DISTANCE_ECHO_IO, mode=Pin.IN, pull=Pin.PULL_UP)
 
 # Erzeuge Instanzen der Motor-Klasse
-led = Pin(LED_ONBOARD_PIN, Pin.OUT)
+led = Pin(LED_ONBOARD_IO, Pin.OUT)
 
 # Funktionen
 
 # Demo-Funktion zum Steuern eines Servos (Optional)
 def servo_turn():
-    servo = PWM(Pin(SERVO_PIN), freq=50)
-    servo.duty_ns(SERVO_MIN)
-    sleep(1)
-    servo.duty_ns(SERVO_MAX)
-    sleep(1)
-    servo.duty_ns(SERVO_MID)
+    servo = PWM(Pin(IO_SERVO), freq=50)
+    #servo.duty_ns(SERVO_ANGLE_MIN)
+    #sleep(1)
+    #servo.duty_ns(SERVO_ANGLE_MAX)
+    #sleep(1)
+    servo.duty_ns(SERVO_ANGLE_MID)
     sleep(1)
     servo.deinit()
 
-# Funktionen zum Steuern des Robos
-def motor_forward(pin1, pin2, speed):
-    pin1.duty_u16(0)
-    pin2.duty_u16(int(MOTOR_PWM_MAX_DUTY_CYLCE * speed))  # Type cast zu Integer, variable speed ist vom typ Float
+
+class Motor:
+    def __init__(self, pin1, pin2, speed):
+        self.speed = speed
+        self.pwm_pin1 = PWM(Pin(pin1, Pin.OUT), freq=MOTOR_PWM_FREQUENCY, duty_u16=0)
+        self.pwm_pin2 = PWM(Pin(pin2, Pin.OUT), freq=MOTOR_PWM_FREQUENCY, duty_u16=0)
+
+    # Funktionen zum Steuern des Robos
+    def forward(self):
+        self.pwm_pin1.duty_u16(0)
+        self.pwm_pin2.duty_u16(int(MOTOR_PWM_MAX_DUTY_CYLCE * self.speed))  # Type cast zu Integer, variable speed ist vom typ Float
+
+    def backward(self):
+        self.pwm_pin1.duty_u16(int(MOTOR_PWM_MAX_DUTY_CYLCE * self.speed))  # Type cast zu Integer, variable speed ist vom typ Float
+        self.pwm_pin2.duty_u16(0)
+
+    def stop(self):
+        self.pwm_pin1.duty_u16(0)
+        self.pwm_pin2.duty_u16(0)
 
 
-def motor_backward(pin1, pin2, speed):
-    pin1.duty_u16(int(MOTOR_PWM_MAX_DUTY_CYLCE * speed))  # Type cast zu Integer, variable speed ist vom typ Float
-    pin2.duty_u16(0)
+class Robo:
+    def __init__(self, motor1, motor2):
+        self.motor1 = motor1
+        self.motor2 = motor2
+
+    def stop(self):
+        """ Stoppt das Roboter Auto """
+        # +++ 2) +++ alle Motoren stop 
 
 
-def motor_stop(pin1, pin2):
-    pin1.duty_u16(0)
-    pin2.duty_u16(0)
+        # eine 1/2 Sekunde warten
+        sleep(0.5)
+
+    def go(self):
+        """ Faehrt Roboter Auto forwaerts """
+        # Fahre Robo vorwaerts
+        self.motor1.forward()
+        self.motor2.forward()
+
+    def turn(self):
+        """ Dreht Roboter in eine zufaellige Richtung """
+        # servo_turn()  # Einkommentieren um einen Servo anzusteuern
+        # +++ 3) +++ Drehe Robo in ein beliebige Richtung
+        # Waehle zufaellig eine Drehrichtung
+        richtung = 1
+        if richtung:
+            # Robo dreht in die eine Richtung
+            self.motor1.forward()
+            self.motor2.backward()
+
+            # Robo dreht in die andere Richtung
 
 
-def robo_stop():
-    """ Stoppt das Roboter Auto """
-    # +++ 2) +++ alle Motoren stop 
-
-
-    # eine 1/2 Sekunde warten
-    sleep(0.5)
-
-
-def robo_go():
-    """ Faehrt Roboter Auto forwaerts """
-    # Fahre Robo vorwaerts
-    motor_forward(motor_line_1a, motor_line_1b, MOTOR_SPEED_1)
-    motor_forward(motor_line_2a, motor_line_2b, MOTOR_SPEED_2)
-
-
-def robo_turn():
-    """ Dreht Roboter in eine zufaellige Richtung """
-    # servo_turn()  # Einkommentieren um einen Servo anzusteuern
-    # +++ 3) +++ Drehe Robo in ein beliebige Richtung
-    # Waehle zufaellig eine Drehrichtung
-    richtung = 1
-    if richtung:
-        # Robo dreht in die eine Richtung
-        motor_forward(motor_line_1a, motor_line_1b, MOTOR_SPEED_1)
-        motor_backward(motor_line_2a, motor_line_2b, MOTOR_SPEED_2)
-
-        # Robo dreht in die andere Richtung
-
-
-    # Lass den Robo eine 1/4, 1/2 oder 3/4  Sekunde drehen
-    delay = choice([0.25, 0.5, 0.75]) 
-    sleep(delay)
-    # alle Motoren stop
-    robo_stop()
+        # Lass den Robo eine 1/4, 1/2 oder 3/4  Sekunde drehen
+        delay = choice([0.25, 0.5, 0.75]) 
+        sleep(delay)
+        # alle Motoren stop
+        self.stop()
 
 # Funktion zum Messen der netfernung mit einem Ultraschallsensors
 def get_distance():
@@ -155,18 +157,21 @@ def get_distance():
 
 # Hier beginnt das Hauptprogramm
 def start():
+    motor1 = Motor(MOTOR_1_LINE_A_IO, MOTOR_1_LINE_B_IO, MOTOR_1_SPEED)
+    motor2 = Motor(MOTOR_2_LINE_A_IO, MOTOR_2_LINE_B_IO, MOTOR_2_SPEED)
+    robo = Robo(motor1, motor2)
+
     """ Startet Roboter Auto """
     # Try-Catch-Block
     try:
         print("Robo faehrt...")
+        servo_turn()
         led.on()
         # servo_turn()  # Einkommentieren um einen Servo anzusteuern
         # Endlosschleife...
         while True:
             # +++ 1) +++ Schreibe Entfernung (cm) auf die Konsole
             distance = get_distance()
-            if distance >= DISTANCE_MAX_RANGE_IN_CM:  # ignoriere Fehlmessung
-                continue
             print(distance)
 
             # +++ 2) +++
@@ -189,7 +194,7 @@ def start():
     # Dieser Block wird immer ausgefuehrt: zum Schluss muss man aufraeumen
     finally:
         # Motoren aus
-        robo_stop()
+        robo.stop()
         led.off()
         print("Programm beendet.")
 

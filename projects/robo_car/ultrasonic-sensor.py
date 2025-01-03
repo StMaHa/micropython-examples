@@ -5,12 +5,12 @@ from utime import sleep_us         # Verzoegerung in Mikrosekunden
 
 DISTANCE_TIME_OF_SOUND_AT_CM = 29.1
 DISTANCE_MAX_RANGE_IN_CM = 500
-DISTANCE_ECHO_PIN = 10
-DISTANCE_TRIGGER_PIN = 11
+DISTANCE_ECHO_IO = 10
+DISTANCE_TRIGGER_IO = 11
 DISTANCE_ECHO_TIMEOUT_US = int(DISTANCE_MAX_RANGE_IN_CM*2*DISTANCE_TIME_OF_SOUND_AT_CM)
 
-distance_trigger = Pin(DISTANCE_TRIGGER_PIN, mode=Pin.OUT)
-distance_echo = Pin(DISTANCE_ECHO_PIN, mode=Pin.IN, pull=Pin.PULL_DOWN)
+distance_trigger = Pin(DISTANCE_TRIGGER_IO, mode=Pin.OUT)
+distance_echo = Pin(DISTANCE_ECHO_IO, mode=Pin.IN, pull=Pin.PULL_DOWN)
 
 def get_distance():
     distance_trigger.value(0)

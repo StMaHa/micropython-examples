@@ -1,14 +1,10 @@
 from machine import Pin
 from time import sleep
 
-PIN_LED = 2
-
-led = Pin(PIN_LED, Pin.OUT)
+led = Pin("LED", Pin.OUT)  # Pico GPIO25, Pico W GPIO00
 
 for i in range(0, 10):
-    led.on()
-    sleep(1)
-    led.off()
+    led.toggle()
     sleep(1)
 
 
