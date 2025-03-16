@@ -16,7 +16,7 @@ Needed parts:
 
 Copy needed files to root directory of the Micropython board:
 - main.py
-- robo_car.py (for exercises: robo_car_1.py, robo_car_2.py, robo_car_3.py)
+- robo_car.py (for exercises: robo_car_task.py, robo_car_task1.py, robo_car_task2.py, robo_car_task3.py)
 
 Features which are possibly used by the robo can be tested separately by  
 the following examples:  

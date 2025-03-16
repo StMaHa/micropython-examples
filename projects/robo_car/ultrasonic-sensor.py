@@ -3,11 +3,11 @@ from machine import time_pulse_us  # Funktion um Echopuls zu messen
 from time import sleep             # Verzoegerung in Sekunden
 from utime import sleep_us         # Verzoegerung in Mikrosekunden
 
-DISTANCE_TIME_OF_SOUND_AT_CM = 29.1
-DISTANCE_MAX_RANGE_IN_CM = 500
+DISTANCE_TIME_OF_SOUND_PER_CM = 29.1
+DISTANCE_MAX_RANGE_IN_CM = 400
 DISTANCE_ECHO_IO = 10
 DISTANCE_TRIGGER_IO = 11
-DISTANCE_ECHO_TIMEOUT_US = int(DISTANCE_MAX_RANGE_IN_CM*2*DISTANCE_TIME_OF_SOUND_AT_CM)
+DISTANCE_ECHO_TIMEOUT_US = int(DISTANCE_MAX_RANGE_IN_CM*2*DISTANCE_TIME_OF_SOUND_PER_CM)
 
 distance_trigger = Pin(DISTANCE_TRIGGER_IO, mode=Pin.OUT)
 distance_echo = Pin(DISTANCE_ECHO_IO, mode=Pin.IN, pull=Pin.PULL_DOWN)
@@ -26,7 +26,7 @@ def get_distance():
         # Max Wert bei Fehlmessung
         pulse_time = DISTANCE_ECHO_TIMEOUT_US
     # Berechne Entfernung in cm
-    distance_cm = (pulse_time / 2) / DISTANCE_TIME_OF_SOUND_AT_CM
+    distance_cm = (pulse_time / 2) / DISTANCE_TIME_OF_SOUND_PER_CM
     return distance_cm
 
 
