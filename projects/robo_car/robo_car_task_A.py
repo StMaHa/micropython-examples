@@ -1,3 +1,5 @@
+# Simple robo car example
+
 from machine import Pin            # Pin-Klasse
 from machine import PWM            # PWM-Klasse
 from machine import time_pulse_us  # Funktion um Echopuls zu messen
