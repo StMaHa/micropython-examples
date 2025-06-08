@@ -1,8 +1,8 @@
-name = input("Wie ist Dein Name? ")
-print(f"Dein name ist {name}.")
+ware = input("Welche Ware kaufen? ")
+preis = input(f"Was kostet {ware}? ")
+print(f"1 {ware} kostet {preis} €.")
 
-alter = input("Wie alt bist Du? ")
-print(f"{name} ist {alter} Jahre alt.")
+print(f"3 {ware} kosten {preis * 3} €.")
+# Typumwandlung
+print(f"3 {ware} kosten {int(preis) * 3} €")
 
-print(alter * 3)
-print(int(alter) * 3)
