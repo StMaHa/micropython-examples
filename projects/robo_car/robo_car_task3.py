@@ -120,15 +120,15 @@ def robo_turn():
     # servo_turn()  # Einkommentieren um einen Servo anzusteuern
     # +++ 3) +++ Drehe Robo in ein beliebige Richtung
     # Waehle zufaellig eine Drehrichtung
-    richtung = choice([0, 1])
+    richtung = 1
     if richtung:
         # Robo dreht in die eine Richtung
         motor_forward(motor_line_1a, motor_line_1b, MOTOR_SPEED_1)
         motor_backward(motor_line_2a, motor_line_2b, MOTOR_SPEED_2)
-    else:
+
         # Robo dreht in die andere Richtung
-        motor_backward(motor_line_1a, motor_line_1b, MOTOR_SPEED_1)
-        motor_forward(motor_line_2a, motor_line_2b, MOTOR_SPEED_2)
+
+
     # Lass den Robo eine 1/4, 1/2 oder 3/4  Sekunde drehen
     delay = choice([0.25, 0.5, 0.75]) 
     sleep(delay)
@@ -177,7 +177,7 @@ def start():
                 robo_stop()
                 # +++ 3) +++
                 # Drehe Robo in ein beliebige Richtung
-                robo_turn()
+
             else:
                 # +++ 2) +++
                 # Andernfalls fahre Robo vorwaerts (Sensorwert (cm) kleiner als 40 cm)

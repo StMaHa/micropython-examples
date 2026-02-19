@@ -102,8 +102,8 @@ def motor_stop(pin1, pin2):
 def robo_stop():
     """ Stoppt das Roboter Auto """
     # +++ 2) +++ alle Motoren stop 
-    motor_stop(motor_line_1a, motor_line_1b)
-    motor_stop(motor_line_2a, motor_line_2b)
+
+
     # eine 1/2 Sekunde warten
     sleep(0.5)
 
@@ -120,15 +120,15 @@ def robo_turn():
     # servo_turn()  # Einkommentieren um einen Servo anzusteuern
     # +++ 3) +++ Drehe Robo in ein beliebige Richtung
     # Waehle zufaellig eine Drehrichtung
-    richtung = choice([0, 1])
+    richtung = 1
     if richtung:
         # Robo dreht in die eine Richtung
         motor_forward(motor_line_1a, motor_line_1b, MOTOR_SPEED_1)
         motor_backward(motor_line_2a, motor_line_2b, MOTOR_SPEED_2)
-    else:
+
         # Robo dreht in die andere Richtung
-        motor_backward(motor_line_1a, motor_line_1b, MOTOR_SPEED_1)
-        motor_forward(motor_line_2a, motor_line_2b, MOTOR_SPEED_2)
+
+
     # Lass den Robo eine 1/4, 1/2 oder 3/4  Sekunde drehen
     delay = choice([0.25, 0.5, 0.75]) 
     sleep(delay)
@@ -171,17 +171,17 @@ def start():
 
             # +++ 2) +++
             # Ist die Entfernung (cm) kleiner 40 cm?
-            if distance < 40:
+
                 # +++ 2) +++
                 # Alle Motoren stop wenn Entfernung (cm) kleiner als 40 cm
-                robo_stop()
+
                 # +++ 3) +++
                 # Drehe Robo in ein beliebige Richtung
-                robo_turn()
-            else:
+
+
                 # +++ 2) +++
                 # Andernfalls fahre Robo vorwaerts (Sensorwert (cm) kleiner als 40 cm)
-                robo_go()
+
             sleep(0.1)  # Wartezeit zwischen Entfernungsmessungen
     # Fangen eines Fehlers/Signals
     except KeyboardInterrupt:
