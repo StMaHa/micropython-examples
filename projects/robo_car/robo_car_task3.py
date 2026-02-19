@@ -47,16 +47,8 @@ MOTOR_LINE_2A_PIN = 18  # Motor 2
 MOTOR_LINE_2B_PIN = 19  # Motor 2
 # Status LED
 LED_ONBOARD_PIN = 25
-# Servo
-SERVO_PIN = 0
-SERVO_MID = 1300000  # 1350000 ns = 1350 us = 1.35 ms
-SERVO_MIN = 800000   # 800000 ns = 800 us = 0.8 ms
-SERVO_MAX = 1900000  # 1900000 ns = 1900 us = 1.9 ms
 
 # Globale Variablen
-
-board_name = os.uname().sysname.strip().lower()
-print("Micropython board:", board_name)
 
 # Initialisiere IOs
 motor_line_1a = PWM(Pin(MOTOR_LINE_1A_PIN, Pin.OUT), freq=MOTOR_PWM_FREQUENCY, duty_u16=0)
@@ -71,17 +63,6 @@ distance_echo = Pin(DISTANCE_ECHO_PIN, mode=Pin.IN, pull=Pin.PULL_DOWN)
 led = Pin(LED_ONBOARD_PIN, Pin.OUT)
 
 # Funktionen
-
-# Demo-Funktion zum Steuern eines Servos (Optional)
-def servo_turn():
-    servo = PWM(Pin(SERVO_PIN), freq=50)
-    servo.duty_ns(SERVO_MIN)
-    sleep(1)
-    servo.duty_ns(SERVO_MAX)
-    sleep(1)
-    servo.duty_ns(SERVO_MID)
-    sleep(1)
-    servo.deinit()
 
 # Funktionen zum Steuern des Robos
 def motor_forward(pin1, pin2, speed):
