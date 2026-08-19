@@ -1,6 +1,6 @@
 # MicroPython
 
-<u>**Content**</u>
+**Content**
 - [Find released states of this git repository](#releases)
 - [How to get ALL latest sources from this git repository](#git_clone)
 - [Flash MicroPython to Controller](#flash)
