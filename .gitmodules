@@ -4,3 +4,6 @@
 [submodule "drivers/bmp180"]
 	path = drivers/bmp180
 	url = https://github.com/StMaHa/micropython-bmp180.git
+[submodule "bmp180"]
+	path = bmp180
+	url = https://github.com/micropython-IMU/micropython-bmp180.git
