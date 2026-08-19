@@ -1,9 +1,17 @@
 # MicroPython
 
+<u>**Content**</u>
+- [Find released states of this git repository](#releases)
+- [How to get ALL latest sources from this git repository](#git_clone)
+- [Flash MicroPython to Controller](#flash)
+- [Example folder](#folder)
+
+<a id="releases"></a>
 ## Find released states of this git repository
 As things change from time to time, certain states, such as trainings, are frozen by tags/releases.  
 [Releases](https://github.com/StMaHa/micropython-examples/releases)
 
+<a id="git_clone"></a>
 ## How to get ALL latest sources from this git repository
 ```
 git clone --recurse-submodules https://github.com/StMaHa/micropython-examples.git
@@ -14,7 +22,7 @@ Change into directory 'micropython-examples'...
 cd micropython-examples
 git submodule update --init --recursive
 ```
-
+<a id="flash"></a>
 ## Flash MicroPython to Controller
 !!! Flashing by calling esptool with not sufficiant argumnets or by using thonny might result in failing controller functions !!!
 
@@ -34,7 +42,7 @@ git submodule update --init --recursive
     - python esptool.py --chip=esp8266 --port=/dev/ttyUSB0 erase_flash
     - python esptool.py --chip=esp8266 --port=/dev/ttyUSB0 write_flash --flash_mode=dio --flash_size=4MB --flash_freq=keep 0x0 esp8266-xxx.bin
 
-
+<a id="folder"></a>
 ## Example folder
 
 Video: 4_mecanum_wheel_demo.mp4
@@ -68,6 +76,9 @@ Video: 4_mecanum_wheel_demo.mp4
 - Web server
 - Wifi client setup
 
+
+---
+---
 # LICENSE
 See the [LICENSE](LICENSE) file for license rights and limitations.
 Submodules might have a different license.
