@@ -1,4 +1,4 @@
-from servo import Servo  # Using library from folder 'drivers'
+from servo import Servo  # Using library
 from time import sleep
 
 pin_gpio = 28
