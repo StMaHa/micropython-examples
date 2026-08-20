@@ -1,10 +1,10 @@
+https://docs.micropython.org/en/latest/library/bluetooth.html
 """
 BLE UART implementation using Nordic UART Service (NUS) for MicroPython.
 
 This module provides a simple bidirectional serial communication over Bluetooth Low Energy
 using the standard Nordic UART Service (NUS). Supports sending and receiving data from
 connected BLE central devices.
-https://docs.micropython.org/en/latest/library/bluetooth.html
 
 Example:
     ble = BLEUART(name="MyDevice")
@@ -126,7 +126,7 @@ class BLEUART:
                 # Read the data written to the RX characteristic
                 msg = self._ble.gatts_read(self._rx_handle)
                 self._rx_buffer.extend(msg)
-                print("Received:", msg.decode().strip())
+                #print("Received:", msg.decode().strip())
 
     def _advertise(self):
         """
@@ -185,7 +185,7 @@ class BLEUART:
         """
         data = bytes(self._rx_buffer)
         self._rx_buffer[:] = b""
-        return data
+        return data.decode().strip()
     
     def is_connected(self):
         """
@@ -195,32 +195,3 @@ class BLEUART:
             bool: True if connected, False otherwise.
         """
         return len(self._connections) > 0
-
-
-# Example usage
-if __name__ == "__main__":
-    """
-    Simple echo server demonstrating BLE UART usage.
-    
-    - Creates a BLE UART peripheral
-    - Waits for a central device to connect (blocks in __init__)
-    - Sends a welcome message
-    - Echoes back any received data
-    """
-    # Initialize BLE UART (blocks until a central connects)
-    ble_uart = BLEUART()
-
-    # Verify connection is established
-    assert ble_uart.is_connected(), "Connection check failed"
-    
-    # Send welcome message to connected central
-    ble_uart.send("Send me a message...")
-    
-    # Main event loop
-    while True:
-        msg = ble_uart.read()  # Non-blocking read of receive buffer
-        if msg:                # If data was received
-            # Echo the message back with a prefix
-            ble_uart.send("Echo: " + msg.decode())
-        time.sleep(0.1)  # Yield to other tasks
-

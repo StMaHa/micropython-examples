@@ -50,9 +50,15 @@ Video: 4_mecanum_wheel_demo.mp4
 ### analog
 
 ### bluetooth
-- Control Pico (2) W from PC/Raspberry Pi via Bluetooth Low Energy (BLE) 
-  - ble_uart.py: Module/library with example for Pico
-  - ble_uart_client.py: Client example controlling Pico
+- Control Pico (W/2/2W) from PC/Raspberry Pi via Bluetooth Low Energy (BLE) 
+  - **ble_uart.py**: Module/library to use Bluetooth on Pico (2) W (onboard BT/WIFI device)
+  - **ble_uart_client.py**: Module/library to use Bluetooth of Pico (2) W (onboard BT/WIFI device) on client side (PC/Raspberry).
+  - **mpy_bt_uart_device_config.py**: Configures BT/BLE-UART devices, e.g. changing Baudrate and BT/BLE device name (AT mode)
+  - **mpy_ble_uart_echo.py**: uController example using ble_uart.py to receive messages and return to sender.
+  - **mpy_bt_ble_uart_led.py**: uController example to Control onboard LED via BT/BLE-UART adapter, utilized by client_bt_uart_led.py or client_ble_uart_led.py
+  - **client_ble_uart_echo.py**: Client side (PC/Raspberry) example to send and receive send messages.
+  - **client_bt_uart_led.py**: Client side (PC/Raspberry) example controls onboard LED of uController board with BT-UART device
+  - **client_ble_uart_led.py**: Client side (PC/Raspberry) example controls onboard LED of uController board with BLE-UART device
 
 ### button
 - Switching LED with a button using callback
