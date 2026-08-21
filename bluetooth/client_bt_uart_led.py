@@ -27,11 +27,11 @@ sudo rfcomm bind 0 XX:XX:XX:XX:XX:XX
 # Change to your outgoing COM port
 PORT_WINDOWS = "COM5"        # Example: COM5 (Outgoing)
 PORT_LINUX = "/dev/rfcomm0"
-BAUD = 9600                  # Match your UART baud rate
+BAUDRATE = 9600                  # Match your UART baud rate
 
 if platform.system().lower() == "windows":
     port = PORT_WINDOWS
-elif platform.system().lower() == "linux"
+elif platform.system().lower() == "linux":
     port = PORT_LINUX
     # Check if device exists
     if not os.path.exists(port):
@@ -43,8 +43,8 @@ else:
     sys.exit(1)
 
 try:
-    ser = serial.Serial(PORT, BAUD, timeout=1)
-    print(f"Connected to {PORT} at {BAUD} baud.")
+    ser = serial.Serial(port, BAUDRATE, timeout=1)
+    print(f"Connected to {port} at {BAUDRATE} baud.")
 
     while True:
         for state in (b"on\n", b"off\n"):

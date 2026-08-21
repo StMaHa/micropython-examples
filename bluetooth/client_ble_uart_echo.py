@@ -5,7 +5,8 @@ from ble_uart_client import BLEUARTClient
 
 # The advertised name used by the BLE peripheral we want to find.
 TARGET_NAME = "PICO_BLE_UART"
-
+USE_READ_POLLING = True  # Set to True to read the device's readable characteristic after each write (polling).
+                          # Set to False to only read the device's TX notify characteristic (event-driven).
 
 async def _uart_echo_client():
     """
@@ -25,20 +26,24 @@ async def _uart_echo_client():
     Raises:
         KeyboardInterrupt: When user presses Ctrl+C
     """
-    # Store the target name in a client object; connection work is asynchronous.
-    ble_uart_client = BLEUARTClient(TARGET_NAME)
     try:
-        # Entering the context scans for the device, connects to it, and finds
-        # the RX/TX characteristics. Exiting it disconnects automatically.
-        async with ble_uart_client as ble_uart:
-            def handle_rx(_, data):
-                """Print a notification received from the BLE UART device."""
-                # Bleak supplies the characteristic and the received bytes.
-                print(f"RX: {data.decode()}")
+        # Entering the context scans, connects, and discovers the UART UUIDs.
+        # Keep the polling policy inside the client instead of handling reads
+        # separately in this application loop.
+        async with BLEUARTClient(TARGET_NAME, use_read_polling=USE_READ_POLLING) as ble_uart:
+            if not USE_READ_POLLING:
+                print("\nListening for notifications from the BLE UART device...")
+                # Define a callback to handle incoming notifications from the BLE UART device.
+                def handle_rx(_, data):
+                    """Print a notification received from the BLE UART device."""
+                    # Bleak supplies the characteristic and the received bytes.
+                    print(f"RX: {data.decode(errors='replace')}")
 
-            # Listen for responses before sending the first message so that
-            # early notifications are not missed.
-            await ble_uart.start_notify(handle_rx)
+                # Listen for responses before sending the first message so that
+                # early notifications are not missed.
+                await ble_uart.start_notify(handle_rx)
+            else:
+                print("\nUsing polling mode to read responses from the BLE UART device...")
 
             print("Sending messages every second...\n")
             i = 0
@@ -47,14 +52,23 @@ async def _uart_echo_client():
                 i += 1
                 msg = f"Hello World {i}"
                 print(f"TX: {msg}")
-                # The client encodes the text and writes it to the peripheral's
-                # RX characteristic.
-                await ble_uart.write(msg)
-                # Yield to the event loop and limit the message rate to one/sec.
+                try:
+                    # The client encodes the text and writes it to the peripheral's
+                    # RX characteristic.
+                    response = await ble_uart.write(msg)
+                    if response:  # Only print if a response was received (polling enabled)
+                        print(f"RX: {response}")
+                except Exception as error:
+                    # Present BLE read/write failures as an application error.
+                    raise ConnectionError(
+                        f"BLE device communication failed: {error}"
+                    ) from None
+                # Delay the event loop and limit the message rate to one/sec.
                 await asyncio.sleep(1)
     except KeyboardInterrupt:
         raise KeyboardInterrupt
-
+    except ConnectionError as error:
+        print(f"{error}\nMake sure the device is advertising and try again.")
 
 def main():
     """Entry point - run the BLE UART client."""
@@ -67,8 +81,12 @@ def main():
         # Run the coroutine until it exits or the user interrupts the program.
         asyncio.run(_uart_echo_client())
     except KeyboardInterrupt:
-        # Stop cleanly instead of showing an interruption traceback.
-        print("\n\nProgram terminated by user")
+        # Allow a manual stop without displaying a traceback.
+        print("\nProgram terminated by user")
+        print("Disconnected")
+    except ConnectionError as e:
+        # Report connection failures raised by the async client.
+        print(f"\n{e}")
         print("Disconnected")
 
 

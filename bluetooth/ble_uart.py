@@ -51,8 +51,10 @@ class BLEUART:
     
     Nordic UART Service (NUS):
     - Service UUID: 6E400001-B5A3-F393-E0A9-E50E24DCCA9E
-    - TX Characteristic (NOTIFY): 6E400003-B5A3-F393-E0A9-E50E24DCCA9E
-    - RX Characteristic (WRITE): 6E400002-B5A3-F393-E0A9-E50E24DCCA9E
+        - TX Characteristic (peripheral -> central, NOTIFY):
+            6E400003-B5A3-F393-E0A9-E50E24DCCA9E
+        - RX Characteristic (central -> peripheral, WRITE):
+            6E400002-B5A3-F393-E0A9-E50E24DCCA9E
     
     Attributes:
         _name (str): Device name advertised in BLE advertisements
@@ -79,9 +81,10 @@ class BLEUART:
 
         # Nordic UART Service (NUS) UUIDs
         UART_UUID = bluetooth.UUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
-        # TX: Device -> Central (Notify capability allows unsolicited messages)
-        UART_TX = (bluetooth.UUID("6E400003-B5A3-F393-E0A9-E50E24DCCA9E"), bluetooth.FLAG_NOTIFY)
-        # RX: Central -> Device (Write capability allows central to send data)
+        # TX means data transmitted by this peripheral to the central device.
+        UART_TX = (bluetooth.UUID("6E400003-B5A3-F393-E0A9-E50E24DCCA9E"), bluetooth.FLAG_NOTIFY | bluetooth.FLAG_READ)
+        # RX means data received by this peripheral from the central device.
+        # FLAG_WRITE allows the central to write commands into RX.
         UART_RX = (bluetooth.UUID("6E400002-B5A3-F393-E0A9-E50E24DCCA9E"), bluetooth.FLAG_WRITE)
         
         # Register the UART service with BLE stack
@@ -158,7 +161,7 @@ class BLEUART:
         # Start advertising with the payload
         self._ble.gap_advertise(_ADV_INTERVAL_US, adv_payload)
 
-    def send(self, data):
+    def write(self, data):
         """
         Send data to all connected central devices.
         
@@ -170,7 +173,10 @@ class BLEUART:
         """
         if isinstance(data, str):
             data = data.encode()
+        # Keep the latest TX payload available for read_gatt_char(). Needed for polling.
+        self._ble.gatts_write(self._tx_handle, data)
         for conn_handle in self._connections:
+            # Needed for notification
             self._ble.gatts_notify(conn_handle, self._tx_handle, data)
 
     def read(self):
