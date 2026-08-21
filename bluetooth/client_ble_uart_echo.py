@@ -1,12 +1,9 @@
-"""
-Example usage of ble_uart_client module
-"""
+"""Send a periodic text message to a BLE UART device and print responses."""
 import asyncio
-from bleak import BleakClient
-from ble_uart_client import find_device_by_name, get_uart_uuids
+from ble_uart_client import BLEUARTClient
 
 
-# Target device name to connect to
+# The advertised name used by the BLE peripheral we want to find.
 TARGET_NAME = "PICO_BLE_UART"
 
 
@@ -14,60 +11,46 @@ async def _uart_echo_client():
     """
     Main BLE UART client function.
 
-    Establishes a BLE connection to a UART peripheral and implements
-    bidirectional communication:
-    - Sends messages to the device
-    - Receives and displays responses
+    Uses ``BLEUARTClient`` as an async context manager for bidirectional
+    communication. Device scanning, connection, and UART characteristic
+    discovery happen when entering the context; disconnection happens when it
+    exits.
 
     Flow:
-    1. Scan and find target device
-    2. Connect to device
-    3. Discover UART characteristics
-    4. Set up notification handler for incoming data
-    5. Send messages in a loop
+    1. Create the BLE UART client
+    2. Connect and discover UART characteristics through ``async with``
+    3. Set up a notification handler for incoming data
+    4. Send messages in a loop
 
     Raises:
         KeyboardInterrupt: When user presses Ctrl+C
     """
-    # Step 1: Find target device by name
-    mac = await find_device_by_name(TARGET_NAME)
-    if not mac:
-        print("Device not found.\nMake sure the device is advertising and try again.")
-        return
-
-    # Step 2: Connect to the device
-    print(f"Connecting to {TARGET_NAME}...")
+    # Store the target name in a client object; connection work is asynchronous.
+    ble_uart_client = BLEUARTClient(TARGET_NAME)
     try:
-        async with BleakClient(mac) as client:
-            print("Connected\n")
-
-            # Step 3: Auto-detect UART characteristic UUIDs
-            rx_uuid, tx_uuid = await get_uart_uuids(client)
-
-            # Verify both characteristics were found
-            if not rx_uuid or not tx_uuid:
-                print("Could not find UART characteristics")
-                return
-
-            # Step 4: Set up notification callback for incoming data
-            # This function is called whenever the TX characteristic sends data
+        # Entering the context scans for the device, connects to it, and finds
+        # the RX/TX characteristics. Exiting it disconnects automatically.
+        async with ble_uart_client as ble_uart:
             def handle_rx(_, data):
-                """Callback for received data from device."""
+                """Print a notification received from the BLE UART device."""
+                # Bleak supplies the characteristic and the received bytes.
                 print(f"RX: {data.decode()}")
 
-            # Subscribe to TX notifications (incoming data from device)
-            await client.start_notify(tx_uuid, handle_rx)
+            # Listen for responses before sending the first message so that
+            # early notifications are not missed.
+            await ble_uart.start_notify(handle_rx)
 
-            # Step 5: Send messages in a loop
             print("Sending messages every second...\n")
             i = 0
             while True:
+                # Give each message a distinct sequence number for easy tracing.
                 i += 1
                 msg = f"Hello World {i}"
                 print(f"TX: {msg}")
-                # Write to RX characteristic (sending data to device)
-                await client.write_gatt_char(rx_uuid, msg.encode())
-                # Wait 1 second before sending next message
+                # The client encodes the text and writes it to the peripheral's
+                # RX characteristic.
+                await ble_uart.write(msg)
+                # Yield to the event loop and limit the message rate to one/sec.
                 await asyncio.sleep(1)
     except KeyboardInterrupt:
         raise KeyboardInterrupt
@@ -81,10 +64,10 @@ def main():
         print("=" * 20)
         print()
 
-        # Run the async client
+        # Run the coroutine until it exits or the user interrupts the program.
         asyncio.run(_uart_echo_client())
     except KeyboardInterrupt:
-        # User pressed Ctrl+C
+        # Stop cleanly instead of showing an interruption traceback.
         print("\n\nProgram terminated by user")
         print("Disconnected")
 

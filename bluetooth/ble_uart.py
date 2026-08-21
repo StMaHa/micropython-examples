@@ -1,4 +1,4 @@
-https://docs.micropython.org/en/latest/library/bluetooth.html
+# https://docs.micropython.org/en/latest/library/bluetooth.html
 """
 BLE UART implementation using Nordic UART Service (NUS) for MicroPython.
 
