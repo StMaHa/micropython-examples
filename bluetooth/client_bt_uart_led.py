@@ -5,6 +5,8 @@ import platform
 import sys
 '''
 Connect to the BT-UART adapter
+- JDY-31:    BT CLassic only
+- JDY-33:    BT CLassic (JDY-33-SPP) and BLE (JDY-33-BLE)
 
 Windows:
 - Get corresponding COM ports from Windows device manager

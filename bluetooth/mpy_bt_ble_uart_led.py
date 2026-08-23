@@ -4,7 +4,6 @@ from time import sleep
 # Bluetooth - UART adapter
 # - JDY-31:    BT CLassic only
 # - JDY-33:    BT CLassic and BLE
-# - HC05/HC06: BT CLassic only
 
 UART_ID = 0            # Use UART0 (pins GP0=TX, GP1=RX by default)
 TX_PIN = 0             # GP0 -> RX JDY-31
@@ -25,23 +24,23 @@ def send_cmd(cmd):
 uart = UART(UART_ID, baudrate=BAUD_RATE, tx=Pin(TX_PIN), rx=Pin(RX_PIN))
 led = Pin("LED", Pin.OUT)
 
+enable_loop = True
 send_cmd("AT+VERSION")
 send_cmd("AT+LADDR")
 send_cmd("AT+BAUD")
 name1 = send_cmd("AT+NAME")
 name2 = send_cmd("AT+NAMB")
-enable_loop = False
+
 if name1 and name2:
     name1 = name1.split('=')[1]
     name2 = name2.split('=')[1]
     print(f"\nNow connect to BT-UART adapter '{name1}' or '{name2}'.")
-    enable_loop = True
 elif name1:
     name1 = name1.split('=')[1]
     print(f"\nNow connect to BT-UART adapter '{name1}'.")
-    enable_loop = True
 else:
     uart.deinit()
+    enable_loop = False
     print("ERROR! UART is not working as expected.")
 
 try:
@@ -57,11 +56,11 @@ try:
         if ("on" in data) or ("1" == data):
           led.on()
           print('LED on')
-          uart.write('LED on\n')
+          uart.write('LED is on\n')
         elif ("off" in data) or ("0" == data):
           led.off()
           print('LED off')
-          uart.write('LED off\n')
+          uart.write('LED is off\n')
 except KeyboardInterrupt:
     print("Program terminated by user")
 finally:

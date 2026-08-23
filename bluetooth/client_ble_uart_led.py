@@ -2,10 +2,14 @@
 import asyncio
 from ble_uart_client import BLEUARTClient
 
+# Bluetooth - UART adapter
+# Raspberry Pi Pico W/2W
+# - JDY-33:    BT CLassic (JDY-33-SPP) and BLE (JDY-33-BLE)
 
 # The advertised name used by the BLE peripheral we want to find.
 TARGET_NAME = "JDY-33-BLE"
 USE_READ_POLLING = False  # Set to True to read the device's readable characteristic after each write (polling).
+                          #  Polling cannot be used easily on some devices. Notification is working fast and reliable.
                           # Set to False to only read the device's TX notify characteristic (event-driven).
 
 async def _uart_led_client():
@@ -53,15 +57,14 @@ async def _uart_led_client():
                     try:
                         # The client writes the command and reads the response.
                         response = await ble_uart.write(state)
+                        await asyncio.sleep(0.1)
                         if response:  # Only print if a response was received (polling enabled)
                             print(f"RX: {response}")
                     except Exception as error:
                         # Present BLE read/write failures as an application error.
-                        raise ConnectionError(
-                            f"BLE device communication failed: {error}"
-                        ) from None
+                        raise ConnectionError(f"BLE device communication failed: {error}")
                     # Keep each LED state active to see LED blinking.
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(0.9)
     except KeyboardInterrupt:
         raise KeyboardInterrupt
     except ConnectionError as error:

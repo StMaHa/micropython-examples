@@ -59,6 +59,7 @@ Video: 4_mecanum_wheel_demo.mp4
   - **client_ble_uart_echo.py**: Client side (PC/Raspberry) example to send and receive send messages.
   - **client_bt_uart_led.py**: Client side (PC/Raspberry) example controls onboard LED of uController board with BT-UART device
   - **client_ble_uart_led.py**: Client side (PC/Raspberry) example controls onboard LED of uController board with BLE-UART device
+  - **client_ble_uart_led_simple.py**: Client side (PC/Raspberry) example controls onboard LED of uController board with BLE-UART device
 
 ### button
 - Switching LED with a button using callback

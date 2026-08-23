@@ -9,7 +9,7 @@
 ## Bluetooth Classic
 
 **Devices:**
-- HC05
+- Rapsberry Pi Pico W/2W
 - JDY-31
 - JDY-33 (Dual-Modus Bluetooth)
 

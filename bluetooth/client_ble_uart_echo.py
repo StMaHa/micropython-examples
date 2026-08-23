@@ -2,10 +2,14 @@
 import asyncio
 from ble_uart_client import BLEUARTClient
 
+# Bluetooth - UART adapter
+# - Raspberry Pi Pico W/2W
+# - JDY-33:    BT CLassic (JDY-33-SPP) and BLE (JDY-33-BLE)
 
 # The advertised name used by the BLE peripheral we want to find.
-TARGET_NAME = "PICO_BLE_UART"
-USE_READ_POLLING = True  # Set to True to read the device's readable characteristic after each write (polling).
+TARGET_NAME = "PICO_BLE_UART"  # See configured name on Raspberry Pi Pico W/2W
+USE_READ_POLLING = False  # Set to True to read the device's readable characteristic after each write (polling).
+                          #  Polling is working with BLE of Raspberry Pi Pico W/2W, other devices might not.
                           # Set to False to only read the device's TX notify characteristic (event-driven).
 
 async def _uart_echo_client():

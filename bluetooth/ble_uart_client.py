@@ -23,9 +23,6 @@ Example:
 import asyncio
 from bleak import BleakScanner, BleakClient
 
-# Target device name to connect to
-TARGET_NAME = "PICO_BLE_UART"
-
 
 class BLEUARTClient:
     """Manage a BLE UART connection and its UART characteristics."""
@@ -41,7 +38,10 @@ class BLEUARTClient:
         self._notifications_started = False
 
     async def __aenter__(self):
-        """Connect when entering an async context."""
+        """Called automatically when entering ``async with BLEUARTClient(...) as x:``.
+
+        Connects to the device. The value returned here becomes ``x``.
+        """
         if not await self.connect():
             raise ConnectionError(
                 f"Device {self.target_name} was not found"
@@ -49,7 +49,12 @@ class BLEUARTClient:
         return self
 
     async def __aexit__(self, _, __, ___):
-        """Disconnect when leaving an async context."""
+        """Called automatically when leaving the ``async with`` block.
+
+        Runs even if an error happened inside the block, so the connection
+        is always cleaned up (like a ``finally``). The 3 unused args carry
+        exception info, if any.
+        """
         await self.stop_notify()
         await self.disconnect()
 
@@ -82,9 +87,13 @@ class BLEUARTClient:
         rx_uuid = None
         tx_uuid = None
         read_uuid = None
+        print("Get UART UUIDs:")
         for service in self.client.services:
             for char in service.characteristics:
-                if "write" in char.properties:
+                print(char.properties, char.uuid)
+                if char.uuid.startswith("0000a2"):
+                    continue
+                if not rx_uuid and ("write" in char.properties):
                     # NUS RX means peripheral receive. The central writes
                     # commands here, so write() uses this UUID.
                     #
@@ -97,8 +106,8 @@ class BLEUARTClient:
                     # abstracts this, but the underlying behavior affects timing and
                     # throughput. This UUID is used for all outbound messages.
                     rx_uuid = char.uuid
-                    print(f"Found RX characteristic: {rx_uuid}")
-                if "notify" in char.properties:
+
+                if not tx_uuid and "notify" in char.properties:
                     # NUS TX means peripheral transmit. The central receives
                     # asynchronous responses through notifications here.
                     #
@@ -112,8 +121,8 @@ class BLEUARTClient:
                     # latency and reduces traffic. Some modules also expose TX as readable,
                     # but notify remains the real-time channel.
                     tx_uuid = char.uuid
-                    print(f"Found TX characteristic: {tx_uuid}")
-                if "read" in char.properties:
+
+                if not read_uuid and "notify" in char.properties:
                     # A readable characteristic allows the central to perform
                     # an explicit GATT Read Request. This is different from
                     # notifications: notifications push data automatically,
@@ -124,7 +133,11 @@ class BLEUARTClient:
                     # waiting for a notification. Not all UART implementations
                     # include this, but if present, it can be used for polling.
                     read_uuid = char.uuid
-                    print(f"Found readable characteristic: {read_uuid}")
+
+        print(f"Using write characteristic:  {rx_uuid}")
+        print(f"Using read characteristic:   {read_uuid}")
+        print(f"Using notify characteristic: {tx_uuid}")
+
         return rx_uuid, tx_uuid, read_uuid
 
     async def connect(self):
@@ -139,7 +152,7 @@ class BLEUARTClient:
         print("Connected\n")
 
         self.rx_uuid, self.tx_uuid, self.read_uuid = await self.get_uart_uuids()
-        if not self.rx_uuid or not self.tx_uuid:
+        if not self.rx_uuid or not self.tx_uuid or not self.read_uuid:
             await self.disconnect()
             raise ConnectionError("Could not find UART characteristics")
         return True
@@ -168,7 +181,7 @@ class BLEUARTClient:
         """
         response = None
         # The central writes to the peripheral's RX characteristic.
-        await self.client.write_gatt_char(self.rx_uuid, message.encode())
+        await self.client.write_gatt_char(self.rx_uuid, message.encode(), response = True)
         if self.use_read_polling:
             await asyncio.sleep(0.1)  # Allow time for the device to process and respond
             # Polling uses a separate readable characteristic when available;
@@ -186,7 +199,7 @@ class BLEUARTClient:
         if not self.read_uuid:
             raise ConnectionError("BLE device has no readable characteristic")
         try:
-            response = await self.client.read_gatt_char(self.read_uuid)
+            response = await self.client.read_gatt_char(self.read_uuid, use_cached = False)
             response = response.decode(errors="replace")
         except:
             print("BLE read failed. Device may not support read characteristic.")

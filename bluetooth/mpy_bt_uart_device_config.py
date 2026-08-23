@@ -4,7 +4,6 @@ from time import sleep
 # Bluetooth - UART adapter
 # - JDY-31:    BT CLassic only
 # - JDY-33:    BT CLassic and BLE
-# - HC05/HC06: BT CLassic only
 
 BAUD_RATE_4 = 9600
 BAUD_RATE_8 = 115200
@@ -58,10 +57,14 @@ if not READ_ONLY:
     print(uart)
 
 if send_cmd("AT+VERSION"):
-    send_cmd("AT+LADDR")
-    send_cmd("AT+BAUD")
-    send_cmd("AT+NAME")
-    send_cmd("AT+NAMB")
+    send_cmd("AT+LADDR")    # MAC
+    send_cmd("AT+BAUD")     # Baudrate
+    send_cmd("AT+UUIDLEN")
+    send_cmd("AT+SVRUUID")
+    send_cmd("AT+CHRUUID")  # READ, WRITE, NOTIFY
+    send_cmd("AT+CRXUUID")  # WRITE, WRITE_WITHOUT_RESPONSE
+    send_cmd("AT+NAME")     # BT CLassic name
+    send_cmd("AT+NAMB")     # BLE name
 else:
     print("ERROR! Cannot connect to UART.")
 uart.deinit()
