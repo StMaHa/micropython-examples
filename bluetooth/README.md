@@ -54,6 +54,25 @@ App will use the system connection
 - Raspberry Pi Pico W/2W (Onboard WIFI/BT)
 - JDY-33 (Dual-Modus Bluetooth, slave only)
 
+**Device characterisitcs:**
+
+Properties describe how a client may interact with a characteristic:
+- `read` - client can read the current value
+- `write_request` - client writes a value and gets an acknowledgement
+- `write_command` - client writes a value with no acknowledgement (fire-and-forget)
+- `notify` - peripheral pushes updates with no acknowledgement
+- `indicate` - peripheral pushes updates and requires acknowledgement
+
+| UUID                                   | Properties                                     | Description                                            |
+|-----------------------------------------|-------------------------------------------------|----------------------------------------------------------|
+| `00002a00-0000-1000-8000-00805f9b34fb` | `['read']`                                       | Device Name (standard GAP characteristic)                 |
+| `00002a01-0000-1000-8000-00805f9b34fb` | `['read']`                                       | Appearance (standard GAP characteristic)                   |
+| `00002a02-0000-1000-8000-00805f9b34fb` | `['read']`                                       | Peripheral Privacy Flag (standard GAP characteristic)       |
+| `00002a04-0000-1000-8000-00805f9b34fb` | `['read']`                                       | Peripheral Preferred Connection Parameters (standard GAP characteristic) |
+| `00002a05-0000-1000-8000-00805f9b34fb` | `['indicate']`                                   | Service Changed (standard GATT characteristic)              |
+| `0000ffe1-0000-1000-8000-00805f9b34fb` | `['write_request', 'write_command', 'notify']`   | Custom UART RX/TX (used for serial data)                    |
+| `0000ffe2-0000-1000-8000-00805f9b34fb` | `['write_request', 'write_command']`             | Custom UART write-only characteristic                       |
+
 
 ### Linux/Windows as master connects to device
  
