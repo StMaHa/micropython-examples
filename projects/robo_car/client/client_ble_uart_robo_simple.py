@@ -4,10 +4,7 @@ This is a minimal, self-contained example (no helper classes, no asyncio)
 that:
 1. Scans for a BLE peripheral by its advertised name
 2. Connects to it
-3. Auto-discovers the UART write/notify characteristics (UUIDs vary by
-   module/vendor - e.g. the JDY-33-BLE does NOT use the standard Nordic
-   UART Service UUIDs used by the MicroPython ble_uart.py example)
-4. Controls Robo by sending commands
+3. Controls Robo by sending commands
 
 simplepyble is a synchronous, C++-backed library, so unlike bleak no
 asyncio/await loop is needed.
@@ -24,47 +21,16 @@ import robo_constants as robo
 import simplepyble
 import sys
 
+
 # The advertised name used by the BLE peripheral we want to find.
-TARGET_NAME = "JDY-33-BLE-00"
+TARGET_NAME = robo.BLE_TARGET_NAME
 
 # Global variables
 write_ble_char = None
 notify_ble_char = None
 ble_device = None
 
-
-def find_uart_characteristics():
-    """Find the writable and notifiable UART characteristics.
-
-    Different BLE UART modules use different (non-standard) UUIDs for
-    their characteristics, so we discover them at runtime instead of
-    hardcoding the Nordic UART Service UUIDs.
-
-    Returns (write, notify):
-        write  = (service_uuid, write_uuid, needs_response) or None
-        notify = (service_uuid, notify_uuid) or None
-    """
-    global ble_device
-
-    write_ble_char = None
-    notify_ble_char = None
-
-    for service in ble_device.services():
-        for char in service.characteristics():
-            uuid = char.uuid()
-            if uuid.startswith("0000a2"):  # meta-information / configuration, not a UART characteristic
-                continue
-
-            capabilities = char.capabilities()
-            if write_ble_char is None and "write_request" in capabilities:
-                write_ble_char = (service.uuid(), uuid, True)
-            if write_ble_char is None and "write_command" in capabilities:
-                write_ble_char = (service.uuid(), uuid, False)
-            if notify_ble_char is None and "notify" in capabilities:
-                notify_ble_char = (service.uuid(), uuid)
-
-    return write_ble_char, notify_ble_char
-
+is_key_pressed = False
 
 def ble_connect(ble_device_name):
     """Scan for ble_device_name and connect the matching peripheral."""
@@ -92,22 +58,26 @@ def ble_connect(ble_device_name):
 
 def send_command(cmd):
     """Write a text command using the discovered write characteristic."""
-    global write_ble_char, ble_device
-    service_uuid, char_uuid, needs_response = write_ble_char
-    data = cmd.encode()
-    if needs_response:
-        ble_device.write_request(service_uuid, char_uuid, data)
-    else:
-        ble_device.write_command(service_uuid, char_uuid, data)
+    global ble_device
+    data = f"{cmd}\n".encode()
+    ble_device.write_command(robo.BLE_UUID_SERVICE, robo.BLE_UUID_WRITE, data)
 
 # Key press event handler function (callback function)
 def on_key_press(event):
+    global is_key_pressed
+    # Ignore the key press if another key is already being processed
+    if is_key_pressed:
+        return
+    is_key_pressed = True
     if event.name in robo.KEY_DICT:
         send_command(robo.KEY_DICT[event.name])
 
 # Key release event handler function (callback function)
 def on_key_release(event):
-    send_command("dn")
+    global is_key_pressed
+    # Mark that no key is being processed anymore
+    is_key_pressed = False
+    send_command("sp")
 
 # Key action event handler function (callback function)
 def on_key_action(event):
@@ -124,7 +94,7 @@ def handle_rx(data):
 
 def main(target_name):
     """Scan, connect, and forward key presses to the BLE UART peripheral."""
-    global write_ble_char, notify_ble_char, ble_device
+    global ble_device
 
     try:
         ble_device = ble_connect(target_name)
@@ -136,15 +106,10 @@ def main(target_name):
             print(f"Device '{target_name}' was not found. Make sure it is advertising.")
             return
 
-        write_ble_char, notify_ble_char = find_uart_characteristics()
-        if write_ble_char is None:
-            print("Error! No writable UART characteristic found.")
-
-        if notify_ble_char:
+        if robo.BLE_UUID_NOTIFY:
             # Listen for responses before sending the first message so that
             # early notifications are not missed.
-            notify_service, notify_char = notify_ble_char
-            ble_device.notify(notify_service, notify_char, handle_rx)
+            ble_device.notify(robo.BLE_UUID_SERVICE, robo.BLE_UUID_NOTIFY, handle_rx)
 
         print("\nPress arrow keys to move, ESC to exit.")
         # on_press and on_release cannot work together, only one callback is possible

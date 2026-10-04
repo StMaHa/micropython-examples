@@ -29,9 +29,8 @@ sudo rfcomm bind 0 XX:XX:XX:XX:XX:XX
 import keyboard
 import os
 import platform
+import robo_constants as robo
 import serial
-import sys
-import time
 import wmi
 
 # Fallback COM port, used if auto-detection (see find_bluetooth_com_port) fails
@@ -39,28 +38,6 @@ MAC_ADDRESS = "E0ABAC019A95"  # Replace with your BT-UART device's MAC address
 PORT_WINDOWS = "COM5"         # Example: COM5 (Outgoing)
 PORT_LINUX = "/dev/rfcomm0"
 BAUDRATE = 9600               # Match your UART baud rate
-
-KEY_DICT = {
-    # up / forward
-    "up": "up",     
-    "nach-oben": "up",
-    # down / backward
-    "down": "dn",
-    "nach-unten": "dn",
-    # left / turn left
-    "left": "lt",   
-    "nach-links": "lt",
-    # right / turn right
-    "right": "rt",
-    "nach-rechts": "rt",
-    # stop
-    "end": "sp",
-    "ende": "sp",
-    "clear": "sp",
-    "enter": "run",
-    # escape / exit / cancel
-    "esc": "esc"
-}
 
 serial_port = None
 
@@ -117,8 +94,8 @@ def send_command(cmd):
 
 # Key press event handler function (callback function)
 def on_key_press(event):
-    if event.name in KEY_DICT:
-        send_command(KEY_DICT[event.name])
+    if event.name in robo.KEY_DICT:
+        send_command(robo.KEY_DICT[event.name])
 
 # Key release event handler function (callback function)
 def on_key_release(event):

@@ -4,9 +4,10 @@ Requirements:
     pip install simplepyble
 """
 import simplepyble
+import sys
 
 # The advertised name used by the BLE peripheral we want to find.
-TARGET_NAME = "JDY-33-BLE"
+TARGET_NAME = "JDY-33-BLE-00"
 
 
 def list_ble_characteristics(peripheral):
@@ -17,6 +18,7 @@ def list_ble_characteristics(peripheral):
     hardcoding the Nordic UART Service UUIDs.
     """
     for service in peripheral.services():
+        print(f"\n{service.uuid()} ({len(service.characteristics())} service items):")
         for char in service.characteristics():
             uuid = char.uuid()
             capabilities = char.capabilities()
@@ -54,8 +56,12 @@ def ble_connect(ble_device_name):
 
 def main():
     """Connect, and show BLE UART characteristics."""
+    ble_device_name = TARGET_NAME  # default name
+    if len(sys.argv) > 1:  # First value is the script name
+        ble_device_name = sys.argv[1]
+    print(f"{sys.argv[0]} {ble_device_name}\n")
     try:
-        ble_device = ble_connect(TARGET_NAME)
+        ble_device = ble_connect(ble_device_name)
         if ble_device:
             list_ble_characteristics(ble_device)
     finally:

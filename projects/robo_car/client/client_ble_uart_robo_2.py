@@ -14,35 +14,16 @@ Requirements:
 """
 import asyncio
 import keyboard
+import robo_constants as robo
+import sys
 from bleak import BleakScanner, BleakClient
 
 # The advertised name used by the BLE peripheral we want to find.
-TARGET_NAME = "JDY-33-BLE-00"
+TARGET_NAME = robo.BLE_TARGET_NAME
+
 client = None
 write_uuid = None
 notify_uuid = None
-
-KEY_DICT = {
-    # up / forward
-    "up": "up",     
-    "nach-oben": "up",
-    # down / backward
-    "down": "dn",
-    "nach-unten": "dn",
-    # left / turn left
-    "left": "lt",   
-    "nach-links": "lt",
-    # right / turn right
-    "right": "rt",
-    "nach-rechts": "rt",
-    # stop
-    "end": "sp",
-    "ende": "sp",
-    "clear": "sp",
-    "enter": "run",
-    # escape / exit / cancel
-    "esc": "esc"
-}
 
 
 def find_uart_characteristics(client):
@@ -77,14 +58,14 @@ async def send_command(cmd):
 
 # Key press event handler function (callback function)
 def on_key_press(event):
-    if event.name in KEY_DICT:
-        asyncio.run(send_command(KEY_DICT[event.name]))
+    if event.name in robo.KEY_DICT:
+        asyncio.run(send_command(robo.KEY_DICT[event.name]))
 
-
+# Key release event handler function (callback function)
 def on_key_release(event):
      asyncio.run(send_command("dn"))
 
-
+# Key action event handler function (callback function)
 def on_key_action(event):
     if event.event_type == keyboard.KEY_DOWN:
         on_key_press(event)
@@ -92,17 +73,17 @@ def on_key_action(event):
         on_key_release(event)
 
 
-async def main():
+async def main(target_name):
     """Scan, connect, and toggle the LED on/off every second (polling)."""
     global client, write_uuid, notify_uuid
 
-    print(f"Scanning for {TARGET_NAME}...")
-    device = await BleakScanner.find_device_by_name(TARGET_NAME, timeout=10.0)
+    print(f"Scanning for {target_name}...")
+    device = await BleakScanner.find_device_by_name(target_name, timeout=10.0)
     if device is None:
-        print(f"Device '{TARGET_NAME}' was not found. Make sure it is advertising.")
+        print(f"Device '{target_name}' was not found. Make sure it is advertising.")
         return
 
-    print(f"Found {TARGET_NAME} at {device.address}")
+    print(f"Found {target_name} at {device.address}")
     async with BleakClient(device) as client:
         print("Connected\n")
 
@@ -129,8 +110,12 @@ async def main():
 
 
 if __name__ == "__main__":
+    ble_device_name = TARGET_NAME  # default name
+    if len(sys.argv) > 1:  # First value is the script name
+        ble_device_name = sys.argv[1]
+    print(f"{sys.argv[0]} {ble_device_name}\n")
     try:
-        asyncio.run(main())
+        asyncio.run(main(ble_device_name))
     except KeyboardInterrupt:
         print("\nProgram terminated by user")
         print("Disconnected")
