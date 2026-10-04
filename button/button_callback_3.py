@@ -2,20 +2,26 @@ from machine import Pin, Timer
 from time import sleep
 
 # Pins of ESP8266
-#buttonPin = 0  # D3
-#ledPin = 2     # D4
+#GPIO_BUTTON = 0  # D3
+#GPIO_LED = 2     # D4
 
 # Pins of ESP32
-button_pin = 17  # IO17
-led_pin = 16     # IO16
+#GPIO_BUTTON = 17  # IO17
+#GPIO_LED = 16     # IO16
+
+# Pins of Raspberry Pi Pico
+GPIO_BUTTON = 4  # GP4
+GPIO_LED = 2     # GP2
+
 button_busy = False
 
-button = Pin(button_pin, Pin.IN, Pin.PULL_UP)
-led = Pin(led_pin, Pin.OUT)
+button = Pin(GPIO_BUTTON, Pin.IN, Pin.PULL_UP)
+led = Pin(GPIO_LED, Pin.OUT)
 led.off()
 
 # Timer object
-release_timer = Timer(1)
+# release_timer = Timer(1)  # ESP32, hardware timer
+release_timer = Timer(-1)   # Raspberry Pi Pico
 
 # Timer-Callback-Funktion zum entprellen des Tasters
 # Taster wird freigegeben
